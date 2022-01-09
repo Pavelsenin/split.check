@@ -1,2 +1,8 @@
-
 debug: true
+
+# Custom application properties
+application:
+  show:
+    context: "true"
+
+

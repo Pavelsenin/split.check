@@ -29,9 +29,6 @@ public class SampleControllerTest extends AbstractTestNGSpringContextTests {
 
     @Test
     public void testController() throws Exception {
-        String[] beans = webApplicationContext.getBeanDefinitionNames();
-        Arrays.stream(beans).sorted().forEach(System.out::println);
-
         this.mockMvc.perform(get("/test/sample/").param("code", "123"))
                 .andDo(System.out::println)
                 .andExpect(status().isOk())
