@@ -1,8 +1,22 @@
+# Logging
 debug: true
+trace: false
+logging:
+  file:
+    path: "./logs/"
+
+# Spring
+
+spring:
+  profiles:
+    active: "local,dev,prom"
+  output:
+    ansi:
+      enabled: "detect"
+
 
 # Custom application properties
 application:
   show:
     context: "true"
-
 
