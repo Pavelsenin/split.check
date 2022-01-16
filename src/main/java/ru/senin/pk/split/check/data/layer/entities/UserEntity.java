@@ -1,12 +1,14 @@
-package ru.senin.pk.entities;
+package ru.senin.pk.split.check.data.layer.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserEntity {
     /**
      * User id
@@ -19,7 +21,7 @@ public class UserEntity {
     private String name;
 
     /**
-     * User checks
+     * User checks id
      */
-    private List<CheckEntity> checks;
+    private List<Long> checksIds;
 }

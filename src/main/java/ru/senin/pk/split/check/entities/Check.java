@@ -1,14 +1,16 @@
-package ru.senin.pk.entities;
+package ru.senin.pk.split.check.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class CheckEntity {
+@NoArgsConstructor
+public class Check {
     /**
      * Check id
      */
@@ -27,10 +29,10 @@ public class CheckEntity {
     /**
      * Check purchases
      */
-    private List<PurchaseEntity> purchases;
+    private List<Purchase> purchases;
 
     /**
      * Check users
      */
-    private List<UserEntity> users;
+    private List<User> users;
 }

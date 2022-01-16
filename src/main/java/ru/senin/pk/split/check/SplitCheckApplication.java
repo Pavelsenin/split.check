@@ -1,4 +1,4 @@
-package ru.senin.pk;
+package ru.senin.pk.split.check;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

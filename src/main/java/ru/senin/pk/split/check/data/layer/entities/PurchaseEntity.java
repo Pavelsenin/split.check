@@ -1,11 +1,15 @@
-package ru.senin.pk.entities;
+package ru.senin.pk.split.check.data.layer.entities;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class PurchaseEntity {
     /**
      * Purchase id
@@ -23,12 +27,12 @@ public class PurchaseEntity {
     private BigDecimal cost;
 
     /**
-     * Purchase payer
+     * Purchase payer id
      */
-    private UserEntity payer;
+    private Long payerId;
 
     /**
-     * Purchase consumers
+     * Purchase consumers ids
      */
-    private List<UserEntity> consumers;
+    private List<Long> consumerIds;
 }

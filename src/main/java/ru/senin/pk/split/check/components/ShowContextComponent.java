@@ -1,4 +1,4 @@
-package ru.senin.pk.components;
+package ru.senin.pk.split.check.components;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
