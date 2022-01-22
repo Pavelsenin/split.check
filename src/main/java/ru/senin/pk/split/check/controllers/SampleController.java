@@ -11,21 +11,20 @@ import ru.senin.pk.split.check.data.layer.dao.UserDao;
 import ru.senin.pk.split.check.data.layer.entities.CheckEntity;
 import ru.senin.pk.split.check.data.layer.entities.PurchaseEntity;
 import ru.senin.pk.split.check.data.layer.entities.UserEntity;
-import ru.senin.pk.split.check.entities.Check;
-import ru.senin.pk.split.check.entities.Purchase;
 import ru.senin.pk.split.check.utils.SerializationUtils;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 public class SampleController {
 
-    private UserDao userDao;
+    private final UserDao userDao;
 
-    private CheckDao checkDao;
+    private final CheckDao checkDao;
 
-    private PurchaseDao purchaseDao;
+    private final PurchaseDao purchaseDao;
 
     @Autowired
     public SampleController(UserDao userDao, CheckDao checkDao, PurchaseDao purchaseDao) {
@@ -41,29 +40,65 @@ public class SampleController {
 
     @GetMapping(path = "/test/user")
     public String getUser(@RequestParam Long id) {
-        Optional<UserEntity> userEntity = userDao.getUser(id);
+        Optional<UserEntity> userEntity = userDao.getUserById(id);
         return userEntity.map(SerializationUtils::toString).orElse("User not found");
     }
 
     @GetMapping(path = "/test/user_checks")
     public String getUserChecks(@RequestParam Long id) {
-        Optional<UserEntity> userEntity = userDao.getUser(id);
+        Optional<UserEntity> userEntity = userDao.getUserById(id);
         if (!userEntity.isPresent()) {
             return "User not found";
         }
-        List<CheckEntity> checkEntities = checkDao.getChecks(userEntity.get().getChecksIds());
+        checkDao.getChecksByIds(null);
+        List<CheckEntity> checkEntities = checkDao.getChecksByIds(userEntity.get().getChecksIds());
         return SerializationUtils.toString(userEntity.get()) + " " + SerializationUtils.toString(checkEntities);
     }
 
-    @GetMapping(path = "/test/check")
+    @GetMapping(path = "/test/check/get")
     public String getCheck(@RequestParam Long id) {
-        Optional<CheckEntity> checkEntity = checkDao.getCheck(id);
+        Optional<CheckEntity> checkEntity = checkDao.getCheckById(id);
         return checkEntity.map(SerializationUtils::toString).orElse("Check not found");
+    }
+
+    @GetMapping(path = "/test/check/create")
+    public String createCheck() {
+        CheckEntity checkEntity = new CheckEntity();
+        checkEntity.setName("new_name");
+        checkEntity.setDate(new Date());
+        checkDao.saveCheck(checkEntity);
+        return SerializationUtils.toString(checkEntity);
+    }
+
+    @GetMapping(path = "/test/check/update/add_user")
+    public String updateCheckAddUser(@RequestParam("check_id") Long checkId, @RequestParam("user_id") Long userId) {
+        Optional<CheckEntity> checkEntityOpt = checkDao.getCheckById(checkId);
+        if (!checkEntityOpt.isPresent()) {
+            return "Check not found";
+        }
+        CheckEntity checkEntity = checkEntityOpt.get();
+        checkEntity.getUserIds().add(userId);
+        checkDao.saveCheck(checkEntity);
+
+        return SerializationUtils.toString(checkEntity);
+    }
+
+    @GetMapping(path = "/test/check/update/remove_user")
+    public String updateCheckRemoveUser(@RequestParam("check_id") Long checkId, @RequestParam("user_id") Long userId) {
+        Optional<CheckEntity> checkEntityOpt = checkDao.getCheckById(checkId);
+        if (!checkEntityOpt.isPresent()) {
+            return "Check not found";
+        }
+        CheckEntity checkEntity = checkEntityOpt.get();
+        checkEntity.getUserIds().remove(userId);
+        checkDao.saveCheck(checkEntity);
+
+        return SerializationUtils.toString(checkEntity);
     }
 
     @GetMapping(path = "/test/purchase")
     public String getPurchase(@RequestParam Long id) {
-        Optional<PurchaseEntity> purchaseEntity = purchaseDao.getPurchase(id);
+        Optional<PurchaseEntity> purchaseEntity = purchaseDao.getPurchaseById(id);
         return purchaseEntity.map(SerializationUtils::toString).orElse("Purchase not found");
     }
 
