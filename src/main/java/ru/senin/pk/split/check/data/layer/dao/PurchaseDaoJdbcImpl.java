@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.senin.pk.split.check.data.layer.entities.PurchaseEntity;
+import ru.senin.pk.split.check.data.layer.entities.UserEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,9 +23,9 @@ public class PurchaseDaoJdbcImpl implements PurchaseDao {
     }
 
     @Override
-    public Optional<PurchaseEntity> getPurchase(Long id) {
+    public Optional<PurchaseEntity> getPurchaseById(Long purchaseId) {
         // TODO test join vs several queries performance
-        SqlRowSet purchaseRowSet = jdbcTemplate.queryForRowSet("select id, name, cost from PURCHASES where id=?", id);
+        SqlRowSet purchaseRowSet = jdbcTemplate.queryForRowSet("select id, name, cost from PURCHASES where id=?", purchaseId);
         if (!purchaseRowSet.next()) {
             return Optional.empty();
         }
@@ -33,22 +34,34 @@ public class PurchaseDaoJdbcImpl implements PurchaseDao {
         purchaseEntity.setName(purchaseRowSet.getString("name"));
         purchaseEntity.setCost(purchaseRowSet.getBigDecimal("cost"));
 
-        Long payerId = jdbcTemplate.queryForObject("select user_id from PURCHASES_PAYERS where purchase_id=?", Long.class, id);
+        Long payerId = jdbcTemplate.queryForObject("select user_id from PURCHASES_PAYERS where purchase_id=?", Long.class, purchaseId);
         purchaseEntity.setPayerId(payerId);
 
-        List<Long> consumersIds = jdbcTemplate.queryForList("select user_id from PURCHASES_CONSUMERS where purchase_id=?", Long.class, id);
+        List<Long> consumersIds = jdbcTemplate.queryForList("select user_id from PURCHASES_CONSUMERS where purchase_id=?", Long.class, purchaseId);
         purchaseEntity.setConsumerIds(consumersIds);
 
         return Optional.of(purchaseEntity);
     }
 
     @Override
-    public List<PurchaseEntity> getPurchases(List<Long> ids) {
+    public List<PurchaseEntity> getPurchasesByIds(List<Long> purchaseIds) {
         //TODO optimize db interaction
-        return CollectionUtils.emptyIfNull(ids).stream()
-                .map(this::getPurchase)
+        return CollectionUtils.emptyIfNull(purchaseIds).stream()
+                .map(this::getPurchaseById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PurchaseEntity> getPurchasesByCheckId(Long checkId) {
+        List<Long> purchaseIds = getCheckPurchaseIdsByCheckIdJdbc(checkId);
+        return getPurchasesByIds(purchaseIds);
+    }
+
+    private static final String GET_CHECK_USERS_SQL = "select purchase_id from CHECKS_PURCHASES where check_id=?;";
+
+    private List<Long> getCheckPurchaseIdsByCheckIdJdbc(Long checkId) {
+        return jdbcTemplate.queryForList(GET_CHECK_USERS_SQL, Long.class, checkId);
     }
 }

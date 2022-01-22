@@ -1,4 +1,4 @@
-package ru.senin.pk.split.check.entities;
+package ru.senin.pk.split.check.data.layer.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class UserDto {
     /**
      * User id
      */
@@ -21,7 +21,7 @@ public class User {
     private String name;
 
     /**
-     * User checks
+     * User checks id
      */
-    private List<Check> checksIds;
+    private List<CheckDto> checks;
 }

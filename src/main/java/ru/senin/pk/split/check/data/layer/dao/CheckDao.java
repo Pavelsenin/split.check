@@ -12,7 +12,7 @@ public interface CheckDao {
      * @param id
      * @return Optional<CheckEntity>
      */
-    Optional<CheckEntity> getCheck(Long id);
+    Optional<CheckEntity> getCheckById(Long checkId);
 
     /**
      * Get checks by ids
@@ -20,5 +20,21 @@ public interface CheckDao {
      * @param ids
      * @return List of checks
      */
-    List<CheckEntity> getChecks(List<Long> ids);
+    List<CheckEntity> getChecksByIds(List<Long> checkIds);
+
+    /**
+     * Get checks by user id
+     *
+     * @param userId
+     * @return List of checks
+     */
+    List<CheckEntity> getChecksByUserId(Long userId);
+
+    /**
+     * Save check. If entity id is blank, creates new
+     *
+     * @param entity
+     */
+    void saveCheck(CheckEntity entity);
+
 }
