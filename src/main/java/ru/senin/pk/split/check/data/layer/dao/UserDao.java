@@ -46,4 +46,11 @@ public interface UserDao {
      * @return List of users
      */
     List<UserEntity> getConsumersByPurchaseId(Long purchaseId);
+
+    /**
+     * Save user. If user id is blank, creates new
+     *
+     * @param entity
+     */
+    void saveUser(UserEntity entity);
 }

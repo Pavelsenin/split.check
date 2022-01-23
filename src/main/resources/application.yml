@@ -1,9 +1,9 @@
 # Logging
-debug: true
+debug: false
 trace: false
 logging:
-  file:
-    path: "./logs/"
+  file.path: "./logs/"
+  level.root: "INFO"
 
 # Spring
 spring:

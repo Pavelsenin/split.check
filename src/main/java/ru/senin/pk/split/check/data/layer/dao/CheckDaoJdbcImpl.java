@@ -28,8 +28,6 @@ public class CheckDaoJdbcImpl implements CheckDao {
     }
 
     private static final String GET_CHECKS_SQL = "select id, name, date from CHECKS where id=?;";
-    private static final String GET_USER_IDS_SQL = "select user_id from USERS_CHECKS where check_id=?;";
-    private static final String GET_PURCHASES_IDS_SQL = "select purchase_id from CHECKS_PURCHASES where check_id=?;";
 
     @Override
     public Optional<CheckEntity> getCheckById(Long checkId) {
@@ -42,13 +40,8 @@ public class CheckDaoJdbcImpl implements CheckDao {
         checkEntity.setId(checksRowSet.getLong("id"));
         checkEntity.setName(checksRowSet.getString("name"));
         checkEntity.setDate(checksRowSet.getDate("date"));
-
-        List<Long> usersIds = jdbcTemplate.queryForList(GET_USER_IDS_SQL, Long.class, checkId);
-        checkEntity.setUserIds(usersIds);
-
-        List<Long> purchasesIds = jdbcTemplate.queryForList(GET_PURCHASES_IDS_SQL, Long.class, checkId);
-        checkEntity.setPurchaseIds(purchasesIds);
-
+        checkEntity.setUserIds(getUserIdsByCheckIdJdbc(checkId));
+        checkEntity.setPurchaseIds(getPurchasesIdsByCheckIdJdbc(checkId));
         return Optional.of(checkEntity);
     }
 
@@ -69,26 +62,13 @@ public class CheckDaoJdbcImpl implements CheckDao {
     }
 
     @Override
+    @Transactional
     public void saveCheck(CheckEntity entity) {
         if (Objects.isNull(entity.getId())) {
-            createCheck(entity);
+            createChecksJdbc(entity);
         } else {
-            updateCheck(entity);
+            updateChecksJdbc(entity);
         }
-    }
-
-    @Transactional
-    void createCheck(CheckEntity entity) {
-        // TODO what if create not succeeded
-        createChecksJdbc(entity);
-        insertUsersChecksJdbc(entity);
-    }
-
-    @Transactional
-    void updateCheck(CheckEntity entity) {
-        updateChecksJdbc(entity);
-        deleteUsersChecksJdbc(entity);
-        insertUsersChecksJdbc(entity);
     }
 
     private static final String CREATE_CHECK_SQL = "insert into CHECKS (name, date) values (?, ?);";
@@ -102,6 +82,18 @@ public class CheckDaoJdbcImpl implements CheckDao {
             return ps;
         }, keyHolder);
         entity.setId(keyHolder.getKey().longValue());
+    }
+
+    private static final String GET_USER_IDS_SQL = "select user_id from USERS_CHECKS where check_id=?;";
+
+    private List<Long> getUserIdsByCheckIdJdbc(Long checkId) {
+        return jdbcTemplate.queryForList(GET_USER_IDS_SQL, Long.class, checkId);
+    }
+
+    private static final String GET_PURCHASES_IDS_SQL = "select purchase_id from CHECKS_PURCHASES where check_id=?;";
+
+    private List<Long> getPurchasesIdsByCheckIdJdbc(Long checkId) {
+        return jdbcTemplate.queryForList(GET_PURCHASES_IDS_SQL, Long.class, checkId);
     }
 
     private static final String UPDATE_CHECKS_SQL = "update CHECKS set name=?, date=? where id=?;";
@@ -118,28 +110,5 @@ public class CheckDaoJdbcImpl implements CheckDao {
 
     private List<Long> getUserCheckIdsByUserIdJdbc(Long userId) {
         return jdbcTemplate.queryForList(GET_USER_CHECKS_SQL, Long.class, userId);
-    }
-
-    private static final String DELETE_USERS_CHECKS_SQL = "delete from USERS_CHECKS where check_id=?;";
-
-    private void deleteUsersChecksJdbc(CheckEntity entity) {
-        jdbcTemplate.update(DELETE_USERS_CHECKS_SQL, ps -> ps.setLong(1, entity.getId()));
-    }
-
-    private static final String INSERT_USERS_CHECKS_SQL = "insert into USERS_CHECKS (user_id, check_id) values (?, ?);";
-
-    private void insertUsersChecksJdbc(CheckEntity entity) {
-        jdbcTemplate.batchUpdate(INSERT_USERS_CHECKS_SQL, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setLong(1, entity.getUserIds().get(i));
-                ps.setLong(2, entity.getId());
-            }
-
-            @Override
-            public int getBatchSize() {
-                return entity.getUserIds().size();
-            }
-        });
     }
 }

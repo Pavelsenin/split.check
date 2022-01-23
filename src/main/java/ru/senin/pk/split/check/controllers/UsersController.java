@@ -1,5 +1,7 @@
 package ru.senin.pk.split.check.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -7,11 +9,9 @@ import ru.senin.pk.split.check.data.layer.dao.CheckDao;
 import ru.senin.pk.split.check.data.layer.dao.PurchaseDao;
 import ru.senin.pk.split.check.data.layer.dao.UserDao;
 import ru.senin.pk.split.check.data.layer.dto.UserDto;
-import ru.senin.pk.split.check.data.layer.entities.UserEntity;
 import ru.senin.pk.split.check.data.layer.repositories.UserRepository;
 
 import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "/users", produces = "application/json")
@@ -26,6 +26,8 @@ public class UsersController {
 
     private final UserRepository userRepository;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UsersController.class);
+
     @Autowired
     public UsersController(UserDao userDao, CheckDao checkDao, PurchaseDao purchaseDao, UserRepository userRepository) {
         this.userDao = userDao;
@@ -37,19 +39,18 @@ public class UsersController {
     /**
      * Returns current user info
      *
-     * @param userId
      * @return
      */
     @GetMapping(path = "/current")
     @ResponseBody
-    public ResponseEntity getCurrentUser(@RequestParam("user_id") Long userId) { // TODO remove stub param
+    public ResponseEntity getCurrentUser() {
 //        Optional<UserEntity> userEntity = userDao.getUserById(userId);
 //        if (!userEntity.isPresent()) {
 //            return ResponseEntity.notFound().build();
 //        } else {
 //            return ResponseEntity.ok(userEntity.get());
 //        }
-        UserDto currentUser = userRepository.getUser(userId);
+        UserDto currentUser = userRepository.getCurrentUser();
         if (Objects.isNull(currentUser)) {
             return ResponseEntity.notFound().build();
         } else {
@@ -59,6 +60,7 @@ public class UsersController {
 
     @ExceptionHandler
     public ResponseEntity handleException(Exception ex) {
+        LOGGER.error("Error: ", ex);
         return ResponseEntity.internalServerError().build();
     }
 }
