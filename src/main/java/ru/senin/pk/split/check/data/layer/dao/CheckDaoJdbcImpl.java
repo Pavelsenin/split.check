@@ -2,7 +2,6 @@ package ru.senin.pk.split.check.data.layer.dao;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
 @Component
 public class CheckDaoJdbcImpl implements CheckDao {
 
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public CheckDaoJdbcImpl(JdbcTemplate jdbcTemplate) {
@@ -40,8 +39,6 @@ public class CheckDaoJdbcImpl implements CheckDao {
         checkEntity.setId(checksRowSet.getLong("id"));
         checkEntity.setName(checksRowSet.getString("name"));
         checkEntity.setDate(checksRowSet.getDate("date"));
-        checkEntity.setUserIds(getUserIdsByCheckIdJdbc(checkId));
-        checkEntity.setPurchaseIds(getPurchasesIdsByCheckIdJdbc(checkId));
         return Optional.of(checkEntity);
     }
 
@@ -53,12 +50,6 @@ public class CheckDaoJdbcImpl implements CheckDao {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<CheckEntity> getChecksByUserId(Long userId) {
-        List<Long> checkIds = getUserCheckIdsByUserIdJdbc(userId);
-        return getChecksByIds(checkIds);
     }
 
     @Override
@@ -84,18 +75,6 @@ public class CheckDaoJdbcImpl implements CheckDao {
         entity.setId(keyHolder.getKey().longValue());
     }
 
-    private static final String GET_USER_IDS_SQL = "select user_id from USERS_CHECKS where check_id=?;";
-
-    private List<Long> getUserIdsByCheckIdJdbc(Long checkId) {
-        return jdbcTemplate.queryForList(GET_USER_IDS_SQL, Long.class, checkId);
-    }
-
-    private static final String GET_PURCHASES_IDS_SQL = "select purchase_id from CHECKS_PURCHASES where check_id=?;";
-
-    private List<Long> getPurchasesIdsByCheckIdJdbc(Long checkId) {
-        return jdbcTemplate.queryForList(GET_PURCHASES_IDS_SQL, Long.class, checkId);
-    }
-
     private static final String UPDATE_CHECKS_SQL = "update CHECKS set name=?, date=? where id=?;";
 
     private void updateChecksJdbc(CheckEntity entity) {
@@ -104,11 +83,5 @@ public class CheckDaoJdbcImpl implements CheckDao {
             ps.setDate(2, new Date(entity.getDate().getTime()));
             ps.setLong(3, entity.getId());
         });
-    }
-
-    private static final String GET_USER_CHECKS_SQL = "select check_id from USERS_CHECKS where user_id=?;";
-
-    private List<Long> getUserCheckIdsByUserIdJdbc(Long userId) {
-        return jdbcTemplate.queryForList(GET_USER_CHECKS_SQL, Long.class, userId);
     }
 }

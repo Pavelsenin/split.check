@@ -1,197 +1,168 @@
 package ru.senin.pk.split.check.data.layer.repositories;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.senin.pk.split.check.auth.CurrentUserService;
 import ru.senin.pk.split.check.data.layer.dao.*;
-import ru.senin.pk.split.check.data.layer.dto.CheckDto;
-import ru.senin.pk.split.check.data.layer.dto.PurchaseDto;
-import ru.senin.pk.split.check.data.layer.dto.UserDto;
 import ru.senin.pk.split.check.data.layer.entities.CheckEntity;
 import ru.senin.pk.split.check.data.layer.entities.PurchaseEntity;
 import ru.senin.pk.split.check.data.layer.entities.UserEntity;
+import ru.senin.pk.split.check.model.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class UserRepositoryImpl implements UserRepository{
+public class UserRepositoryImpl implements UserRepository {
 
-    private UserDao userDao;
+    private final UserDao userDao;
 
-    private CheckDao checkDao;
+    private final CheckDao checkDao;
 
-    private PurchaseDao purchaseDao;
+    private final PurchaseDao purchaseDao;
 
-    private UserChecksDao userChecksDao;
+    private final UserChecksDao userChecksDao;
 
-    private ChecksPurchasesDao checksPurchasesDao;
+    private final ChecksPurchasesDao checksPurchasesDao;
 
-    private CurrentUserService currentUserService;
+    private final PurchasesPayersDao purchasesPayersDao;
 
-    public UserRepositoryImpl(UserDao userDao, CheckDao checkDao, PurchaseDao purchaseDao, UserChecksDao userChecksDao, ChecksPurchasesDao checksPurchasesDao, CurrentUserService currentUserService) {
+    private final PurchasesConsumersDao purchasesConsumersDao;
+
+    private final CurrentUserService currentUserService;
+
+    private final ConversionService conversionService;
+
+    public UserRepositoryImpl(UserDao userDao, CheckDao checkDao, PurchaseDao purchaseDao, UserChecksDao userChecksDao, ChecksPurchasesDao checksPurchasesDao, PurchasesPayersDao purchasesPayersDao, PurchasesConsumersDao purchasesConsumersDao, CurrentUserService currentUserService, ConversionService conversionService) {
         this.userDao = userDao;
         this.checkDao = checkDao;
         this.purchaseDao = purchaseDao;
         this.userChecksDao = userChecksDao;
         this.checksPurchasesDao = checksPurchasesDao;
+        this.purchasesPayersDao = purchasesPayersDao;
+        this.purchasesConsumersDao = purchasesConsumersDao;
         this.currentUserService = currentUserService;
+        this.conversionService = conversionService;
     }
 
     @Autowired
 
 
     @Override
-    public UserDto getCurrentUser() {
+    public CurrentUser getCurrentUser() {
         Long currentUserId = currentUserService.getCurrentUserId();
         if (Objects.isNull(currentUserId)) {
             return null;
         }
-        return getUser(currentUserId);
-    }
-
-    public UserDto getUser(Long userId) {
-        Optional<UserEntity> userEntityOpt = userDao.getUserById(userId);
-        if (!userEntityOpt.isPresent()) {
+        UserEntity userEntity = userDao.getUserById(currentUserId);
+        if (Objects.isNull(userEntity)) {
             return null;
         }
-        UserEntity userEntity = userEntityOpt.get();
-        UserDto currentUser = convert(userEntity);
+        CurrentUser currentUser = conversionService.convert(userEntity, CurrentUser.class);
 
-        List<CheckEntity> checkEntities = checkDao.getChecksByUserId(currentUser.getId());
-        List<CheckDto> checks = checkEntities.stream()
-                .map(this::convert)
+        // Receive user checks
+        List<Long> currentUserCheckIds = userChecksDao.getChecks(currentUser.getId());
+        List<CheckEntity> checkEntities = checkDao.getChecksByIds(currentUserCheckIds);
+        List<Check> checks = checkEntities.stream()
+                .map(entity -> conversionService.convert(entity, Check.class))
                 .collect(Collectors.toList());
         currentUser.setChecks(checks);
+        //
 
-        for (CheckDto check : checks) {
-            List<UserEntity> checkUserEntities = userDao.getUsersByCheckId(check.getId());
-            List<UserDto> checkUsers = checkUserEntities.stream()
-                    .map(this::convert)
+        for (Check check : checks) {
+            // Receive check users
+            List<Long> checkUserIds = userChecksDao.getUsers(check.getId());
+            List<UserEntity> checkUserEntities = userDao.getUsersByIds(checkUserIds);
+            List<User> checkUsers = checkUserEntities.stream()
+                    .map(entity -> conversionService.convert(entity, RegisteredUser.class))
                     .collect(Collectors.toList());
             check.setUsers(checkUsers);
+            //
 
-            List<PurchaseEntity> purchaseEntities = purchaseDao.getPurchasesByCheckId(check.getId());
-            List<PurchaseDto> purchases = purchaseEntities.stream()
-                    .map(this::convert)
+            // Receive check purchases
+            List<Long> checkPurchaseIds = checksPurchasesDao.getPurchases(check.getId());
+            List<PurchaseEntity> purchaseEntities = purchaseDao.getPurchasesByIds(checkPurchaseIds);
+            List<Purchase> purchases = purchaseEntities.stream()
+                    .map(entity -> conversionService.convert(entity, Purchase.class))
                     .collect(Collectors.toList());
             check.setPurchases(purchases);
+            //
 
-            for (PurchaseDto purchase: purchases) {
-                UserEntity purchasePayerEntity = userDao.getPayerByPurchaseId(purchase.getId());
-                UserDto payerUser = convert(purchasePayerEntity);
+            for (Purchase purchase : purchases) {
+                // Receive payer
+                Long payerUserId = purchasesPayersDao.getPayerUser(purchase.getId());
+                UserEntity purchasePayerEntity = userDao.getUserById(payerUserId);
+                User payerUser = conversionService.convert(purchasePayerEntity, RegisteredUser.class);
                 purchase.setPayer(payerUser);
+                //
 
-                List<UserEntity> purchaseConsumerEntities = userDao.getConsumersByPurchaseId(purchase.getId());
-                List<UserDto> purchaseConsumers = purchaseConsumerEntities.stream()
-                        .map(this::convert)
+                // Receive consumers
+                List<Long> consumerUserIds = purchasesConsumersDao.getConsumerUsers(purchase.getId());
+                List<UserEntity> purchaseConsumerEntities = userDao.getUsersByIds(consumerUserIds);
+                List<User> purchaseConsumers = purchaseConsumerEntities.stream()
+                        .map(entity -> conversionService.convert(entity, RegisteredUser.class))
                         .collect(Collectors.toList());
                 purchase.setConsumers(purchaseConsumers);
+                //
             }
         }
 
         return currentUser;
     }
 
+    @Override
+    public User getUser(Long userId) {
+        if (Objects.isNull(userId)) {
+            return null;
+        }
+        UserEntity userEntity = userDao.getUserById(userId);
+        if (Objects.isNull(userEntity)) {
+            return null;
+        }
+        RegisteredUser user = conversionService.convert(userEntity, RegisteredUser.class);
+        return user;
+    }
+
     @Transactional
     @Override
-    public void saveUser(UserDto user) {
-        UserEntity userEntity = convert(user);
+    public void saveCurrentUser(CurrentUser user) {
+        UserEntity userEntity = conversionService.convert(user, UserEntity.class);
         userDao.saveUser(userEntity);
-        for (CheckDto check: user.getChecks()) {
-            CheckEntity checkEntity = convert(check);
+        for (Check check : user.getChecks()) {
+            CheckEntity checkEntity = conversionService.convert(check, CheckEntity.class);
             checkDao.saveCheck(checkEntity);
             check.setId(checkEntity.getId());
 
-            for (PurchaseDto purchase: check.getPurchases()) {
-                PurchaseEntity purchaseEntity = convert(purchase);
-                purchaseEntity.setPayerId(purchase.getPayer().getId());
-                List<Long> consumerIds = purchase.getConsumers().stream()
-                        .map(UserDto::getId)
-                        .collect(Collectors.toList());
-                purchaseEntity.setConsumerIds(consumerIds);
+            List<Long> usersIds = check.getUsers().stream()
+                    .map(User::getId)
+                    .collect(Collectors.toList());
+            userChecksDao.setUsers(usersIds, check.getId());
+
+            for (Purchase purchase : check.getPurchases()) {
+                PurchaseEntity purchaseEntity = conversionService.convert(purchase, PurchaseEntity.class);
                 purchaseDao.savePurchase(purchaseEntity);
+                purchase.setId(purchaseEntity.getId());
+
+                purchasesPayersDao.setPayerUser(purchase.getPayer().getId(), purchase.getId());
+
+                List<Long> consumerIds = purchase.getConsumers().stream()
+                        .map(User::getId)
+                        .collect(Collectors.toList());
+                purchasesConsumersDao.setConsumerUsers(consumerIds, purchase.getId());
             }
 
             List<Long> purchaseIds = check.getPurchases().stream()
-                    .map(PurchaseDto::getId)
+                    .map(Purchase::getId)
                     .collect(Collectors.toList());
-            checksPurchasesDao.unlinkPurchasesFromCheck(checkEntity.getId());
-            checksPurchasesDao.linkPurchasesToCheck(purchaseIds, checkEntity.getId());
+            checksPurchasesDao.setPurchases(purchaseIds, checkEntity.getId());
 
-            List<Long> usersIds = check.getUsers().stream()
-                    .map(UserDto::getId)
-                    .collect(Collectors.toList());
-            checkEntity.setUserIds(usersIds);
         }
 
         List<Long> checkIds = user.getChecks().stream()
-                .map(CheckDto::getId)
+                .map(Check::getId)
                 .collect(Collectors.toList());
-        userChecksDao.unlinkChecksFromUser(userEntity.getId());
-        userChecksDao.linkChecksToUser(checkIds, userEntity.getId());
+        userChecksDao.setChecks(checkIds, userEntity.getId());
     }
-
-    private UserDto convert(UserEntity entity) {
-        return new UserDto(
-                entity.getId(),
-                entity.getName(),
-                Collections.emptyList()
-        );
-    }
-
-    private CheckDto convert(CheckEntity entity) {
-        return new CheckDto(
-                entity.getId(),
-                entity.getName(),
-                entity.getDate(),
-                Collections.emptyList(),
-                Collections.emptyList()
-
-        );
-    }
-
-    private PurchaseDto convert(PurchaseEntity entity) {
-        return new PurchaseDto(
-                entity.getId(),
-                entity.getName(),
-                entity.getCost(),
-                null,
-                Collections.emptyList()
-        );
-    }
-
-    private UserEntity convert(UserDto dto) {
-        List<Long> checksIds = dto.getChecks().stream()
-                .map(CheckDto::getId)
-                .collect(Collectors.toList());
-        return new UserEntity(
-                dto.getId(),
-                dto.getName(),
-                checksIds
-        );
-    }
-
-    private CheckEntity convert(CheckDto dto) {
-        return new CheckEntity(
-                dto.getId(),
-                dto.getName(),
-                dto.getDate(),
-                null,
-                null
-        );
-    }
-
-    private PurchaseEntity convert(PurchaseDto dto) {
-        return new PurchaseEntity(
-                dto.getId(),
-                dto.getName(),
-                dto.getCost(),
-                null,
-                null
-        );
-    }
-
-
 }

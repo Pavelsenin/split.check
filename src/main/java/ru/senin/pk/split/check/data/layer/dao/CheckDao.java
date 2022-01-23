@@ -23,18 +23,9 @@ public interface CheckDao {
     List<CheckEntity> getChecksByIds(List<Long> checkIds);
 
     /**
-     * Get checks by user id
-     *
-     * @param userId
-     * @return List of checks
-     */
-    List<CheckEntity> getChecksByUserId(Long userId);
-
-    /**
      * Save check. If entity id is blank, creates new
      *
      * @param entity
      */
     void saveCheck(CheckEntity entity);
-
 }

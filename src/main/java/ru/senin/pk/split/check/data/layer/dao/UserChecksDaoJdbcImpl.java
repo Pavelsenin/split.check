@@ -12,18 +12,35 @@ import java.util.List;
 @Component
 public class UserChecksDaoJdbcImpl implements UserChecksDao {
 
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public UserChecksDaoJdbcImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private static final String INSERT_USERS_CHECKS_SQL = "insert into USERS_CHECKS (check_id, user_id) values (?, ?);";
+    private static final String GET_USER_IDS_SQL = "select user_id from USERS_CHECKS where check_id=?;";
 
     @Override
-    public void linkChecksToUser(List<Long> checkIds, Long userId) {
-        jdbcTemplate.batchUpdate(INSERT_USERS_CHECKS_SQL, new BatchPreparedStatementSetter() {
+    public List<Long> getUsers(Long checkId) {
+        return jdbcTemplate.queryForList(GET_USER_IDS_SQL, Long.class, checkId);
+    }
+
+    private static final String GET_USER_CHECKS_SQL = "select check_id from USERS_CHECKS where user_id=?;";
+
+    @Override
+    public List<Long> getChecks(Long userId) {
+        return jdbcTemplate.queryForList(GET_USER_CHECKS_SQL, Long.class, userId);
+    }
+
+    private static final String DELETE_USERS_BY_CHECK_SQL = "delete from USERS_CHECKS where user_id=?;";
+
+    private static final String INSERT_SQL = "insert into USERS_CHECKS (check_id, user_id) values (?, ?);";
+
+    @Override
+    public void setChecks(List<Long> checkIds, Long userId) {
+        jdbcTemplate.update(DELETE_USERS_BY_CHECK_SQL, ps -> ps.setLong(1, userId));
+        jdbcTemplate.batchUpdate(INSERT_SQL, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setLong(1, checkIds.get(i));
@@ -37,10 +54,23 @@ public class UserChecksDaoJdbcImpl implements UserChecksDao {
         });
     }
 
-    private static final String DELETE_USERS_CHECKS_SQL = "delete from USERS_CHECKS where user_id=?;";
+    private static final String DELETE_CHECKS_BY_USER_SQL = "delete from USERS_CHECKS where check_id=?;";
 
     @Override
-    public void unlinkChecksFromUser(Long userId) {
-        jdbcTemplate.update(DELETE_USERS_CHECKS_SQL, ps -> ps.setLong(1, userId));
+    public void setUsers(List<Long> userIds, Long checkId) {
+        jdbcTemplate.update(DELETE_CHECKS_BY_USER_SQL, ps -> ps.setLong(1, checkId));
+
+        jdbcTemplate.batchUpdate(INSERT_SQL, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setLong(1, checkId);
+                ps.setLong(2, userIds.get(i));
+            }
+
+            @Override
+            public int getBatchSize() {
+                return userIds.size();
+            }
+        });
     }
 }

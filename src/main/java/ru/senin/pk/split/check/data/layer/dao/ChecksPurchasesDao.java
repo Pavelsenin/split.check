@@ -5,17 +5,18 @@ import java.util.List;
 public interface ChecksPurchasesDao {
 
     /**
-     * Links purchases to check
+     * Get purchases by check id
+     *
+     * @param checkId
+     * @return
+     */
+    List<Long> getPurchases(Long checkId);
+
+    /**
+     * Set purchases to check
      *
      * @param purchaseIds
      * @param checkId
      */
-    void linkPurchasesToCheck(List<Long> purchaseIds, Long checkId);
-
-    /**
-     * Unlinks all purchases from check
-     *
-     * @param checkId
-     */
-    void unlinkPurchasesFromCheck(Long checkId);
+    void setPurchases(List<Long> purchaseIds, Long checkId);
 }

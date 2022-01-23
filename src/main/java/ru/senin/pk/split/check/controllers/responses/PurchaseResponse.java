@@ -1,4 +1,4 @@
-package ru.senin.pk.split.check.data.layer.dto;
+package ru.senin.pk.split.check.controllers.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PurchaseDto {
+public class PurchaseResponse {
     /**
      * Purchase id
      */
@@ -29,10 +29,10 @@ public class PurchaseDto {
     /**
      * Purchase payer
      */
-    private UserDto payer;
+    private Long payer;
 
     /**
      * Purchase consumers
      */
-    private List<UserDto> consumers;
+    private List<Long> consumers;
 }

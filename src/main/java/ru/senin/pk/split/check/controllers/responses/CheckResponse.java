@@ -1,4 +1,4 @@
-package ru.senin.pk.split.check.data.layer.entities;
+package ru.senin.pk.split.check.controllers.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CheckEntity {
+public class CheckResponse {
     /**
      * Check id
      */
@@ -25,4 +25,14 @@ public class CheckEntity {
      * Check date
      */
     private Date date;
+
+    /**
+     * Check purchases
+     */
+    private List<Long> purchases;
+
+    /**
+     * Check users
+     */
+    private List<Long> users;
 }

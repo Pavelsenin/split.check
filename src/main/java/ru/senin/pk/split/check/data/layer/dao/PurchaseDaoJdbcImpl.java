@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.senin.pk.split.check.data.layer.entities.PurchaseEntity;
+
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 @Component
 public class PurchaseDaoJdbcImpl implements PurchaseDao {
 
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public PurchaseDaoJdbcImpl(JdbcTemplate jdbcTemplate) {
@@ -38,14 +39,6 @@ public class PurchaseDaoJdbcImpl implements PurchaseDao {
         purchaseEntity.setName(purchaseRowSet.getString("name"));
         purchaseEntity.setCost(purchaseRowSet.getBigDecimal("cost"));
 
-//        Long checkId = jdbcTemplate.queryForObject("select check_id from CHECKS_PURCHASES where purchase_id=?", Long.class, purchaseId);
-
-        Long payerId = jdbcTemplate.queryForObject("select user_id from PURCHASES_PAYERS where purchase_id=?", Long.class, purchaseId);
-        purchaseEntity.setPayerId(payerId);
-
-        List<Long> consumersIds = jdbcTemplate.queryForList("select user_id from PURCHASES_CONSUMERS where purchase_id=?", Long.class, purchaseId);
-        purchaseEntity.setConsumerIds(consumersIds);
-
         return Optional.of(purchaseEntity);
     }
 
@@ -59,12 +52,6 @@ public class PurchaseDaoJdbcImpl implements PurchaseDao {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<PurchaseEntity> getPurchasesByCheckId(Long checkId) {
-        List<Long> purchaseIds = getCheckPurchaseIdsByCheckIdJdbc(checkId);
-        return getPurchasesByIds(purchaseIds);
-    }
-
     @Transactional
     @Override
     public void savePurchase(PurchaseEntity entity) {
@@ -73,12 +60,6 @@ public class PurchaseDaoJdbcImpl implements PurchaseDao {
         } else {
             updatePurchaseJdbc(entity);
         }
-    }
-
-    private static final String GET_CHECK_USERS_SQL = "select purchase_id from CHECKS_PURCHASES where check_id=?;";
-
-    private List<Long> getCheckPurchaseIdsByCheckIdJdbc(Long checkId) {
-        return jdbcTemplate.queryForList(GET_CHECK_USERS_SQL, Long.class, checkId);
     }
 
     private static final String CREATE_PURCHASE_SQL = "insert into PURCHASES (name, cost) values (?, ?);";

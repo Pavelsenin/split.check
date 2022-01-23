@@ -1,15 +1,13 @@
-package ru.senin.pk.split.check.data.layer.dto;
+package ru.senin.pk.split.check.controllers.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
+public class UserResponse {
     /**
      * User id
      */
@@ -19,9 +17,4 @@ public class UserDto {
      * User name
      */
     private String name;
-
-    /**
-     * User checks id
-     */
-    private List<CheckDto> checks;
 }

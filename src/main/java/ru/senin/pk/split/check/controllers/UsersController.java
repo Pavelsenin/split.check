@@ -3,13 +3,12 @@ package ru.senin.pk.split.check.controllers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.senin.pk.split.check.data.layer.dao.CheckDao;
-import ru.senin.pk.split.check.data.layer.dao.PurchaseDao;
-import ru.senin.pk.split.check.data.layer.dao.UserDao;
-import ru.senin.pk.split.check.data.layer.dto.UserDto;
+import ru.senin.pk.split.check.model.User;
 import ru.senin.pk.split.check.data.layer.repositories.UserRepository;
+import ru.senin.pk.split.check.controllers.responses.UserResponse;
 
 import java.util.Objects;
 
@@ -18,22 +17,16 @@ import java.util.Objects;
 @CrossOrigin(origins="*")
 public class UsersController {
 
-    private final UserDao userDao;
-
-    private final CheckDao checkDao;
-
-    private final PurchaseDao purchaseDao;
-
     private final UserRepository userRepository;
+
+    private final ConversionService conversionService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UsersController.class);
 
     @Autowired
-    public UsersController(UserDao userDao, CheckDao checkDao, PurchaseDao purchaseDao, UserRepository userRepository) {
-        this.userDao = userDao;
-        this.checkDao = checkDao;
-        this.purchaseDao = purchaseDao;
+    public UsersController(UserRepository userRepository, ConversionService conversionService) {
         this.userRepository = userRepository;
+        this.conversionService = conversionService;
     }
 
     /**
@@ -44,18 +37,12 @@ public class UsersController {
     @GetMapping(path = "/current")
     @ResponseBody
     public ResponseEntity getCurrentUser() {
-//        Optional<UserEntity> userEntity = userDao.getUserById(userId);
-//        if (!userEntity.isPresent()) {
-//            return ResponseEntity.notFound().build();
-//        } else {
-//            return ResponseEntity.ok(userEntity.get());
-//        }
-        UserDto currentUser = userRepository.getCurrentUser();
+        User currentUser = userRepository.getCurrentUser();
         if (Objects.isNull(currentUser)) {
             return ResponseEntity.notFound().build();
-        } else {
-            return ResponseEntity.ok(currentUser);
         }
+        UserResponse view = conversionService.convert(currentUser, UserResponse.class);
+        return ResponseEntity.ok(view);
     }
 
     @ExceptionHandler

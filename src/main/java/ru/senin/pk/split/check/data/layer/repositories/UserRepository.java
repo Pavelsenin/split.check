@@ -1,6 +1,7 @@
 package ru.senin.pk.split.check.data.layer.repositories;
 
-import ru.senin.pk.split.check.data.layer.dto.UserDto;
+import ru.senin.pk.split.check.model.CurrentUser;
+import ru.senin.pk.split.check.model.User;
 
 public interface UserRepository {
 
@@ -9,7 +10,7 @@ public interface UserRepository {
      *
      * @return
      */
-    UserDto getCurrentUser();
+    CurrentUser getCurrentUser();
 
     /**
      * Get user by id
@@ -17,13 +18,13 @@ public interface UserRepository {
      * @param userId
      * @return
      */
-    UserDto getUser(Long userId);
+    User getUser(Long userId);
 
     /**
-     * Updates user and connected entices
+     * Updates current user and connected entices
      *
      * @param user
      * @return
      */
-    void saveUser(UserDto user);
+    void saveCurrentUser(CurrentUser user);
 }

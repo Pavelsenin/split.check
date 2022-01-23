@@ -1,4 +1,4 @@
-package ru.senin.pk.split.check.data.layer.entities;
+package ru.senin.pk.split.check.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PurchaseEntity {
+public class Purchase {
     /**
      * Purchase id
      */
@@ -25,4 +25,14 @@ public class PurchaseEntity {
      * Purchase cost
      */
     private BigDecimal cost;
+
+    /**
+     * Purchase payer
+     */
+    private User payer;
+
+    /**
+     * Purchase consumers
+     */
+    private List<User> consumers;
 }

@@ -5,17 +5,34 @@ import java.util.List;
 public interface UserChecksDao {
 
     /**
-     * Links checks to user
+     * Get users by check id
+     *
+     * @param checkId
+     * @return
+     */
+    List<Long> getUsers(Long checkId);
+
+    /**
+     * Get checks by user id
+     *
+     * @param userId
+     * @return
+     */
+    List<Long> getChecks(Long userId);
+
+    /**
+     * Set checks for user
      *
      * @param checkIds
      * @param userId
      */
-    void linkChecksToUser(List<Long> checkIds, Long userId);
+    void setChecks(List<Long> checkIds, Long userId);
 
     /**
-     * Unlinks all checks from user
+     * Set users for check
      *
-     * @param userId
+     * @param userIds
+     * @param checkId
      */
-    void unlinkChecksFromUser(Long userId);
+    void setUsers(List<Long> userIds, Long checkId);
 }
