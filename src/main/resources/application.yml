@@ -3,7 +3,9 @@ debug: false
 trace: false
 logging:
   file.path: "./logs/"
-  level.root: "INFO"
+  level:
+    root: "INFO"
+    org.springframework.web.servlet.DispatcherServlet: "DEBUG"
 
 # Spring
 spring:
