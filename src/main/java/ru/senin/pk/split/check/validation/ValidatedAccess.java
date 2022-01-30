@@ -86,4 +86,17 @@ public class ValidatedAccess {
         }
         return user;
     }
+
+    /**
+     * Validate user found
+     *
+     * @param currentUser
+     * @throws ServiceValidationException if user not found
+     */
+    public void validateUser(User currentUser) {
+        if (Objects.isNull(currentUser)) {
+            LOGGER.info("User not found");
+            throw new ServiceValidationException("User not found");
+        }
+    }
 }

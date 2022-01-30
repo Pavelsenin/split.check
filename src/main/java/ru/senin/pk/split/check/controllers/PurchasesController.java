@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.senin.pk.split.check.controllers.requests.AddNewPurchaseRequest;
@@ -44,7 +43,7 @@ public class PurchasesController {
 
     @GetMapping(path = "/get")
     @ResponseBody
-    public ResponseEntity getPurchases(
+    public List<PurchaseResponse> getPurchases(
             @RequestParam("check_id") Long checkId
     ) {
         LOGGER.info("Get purchases. checkId: {}", checkId);
@@ -56,7 +55,7 @@ public class PurchasesController {
                 .map(purchase -> conversionService.convert(purchase, PurchaseResponse.class))
                 .collect(Collectors.toList());
         LOGGER.info("Purchases found. purchases: {}, response: {}", purchases, response);
-        return ResponseEntity.ok(response);
+        return response;
     }
 
     /**
@@ -69,7 +68,7 @@ public class PurchasesController {
      */
     @PostMapping(path = "/new")
     @ResponseBody
-    public ResponseEntity addNewPurchase(
+    public PurchaseResponse addNewPurchase(
             @RequestParam("check_id") @NotNull Long checkId,
             @RequestBody @Valid AddNewPurchaseRequest request
     ) {
@@ -95,6 +94,6 @@ public class PurchasesController {
         userRepository.saveCurrentUser(currentUser);
         PurchaseResponse response = conversionService.convert(newPurchase, PurchaseResponse.class);
         LOGGER.info("New purchase added. newPurchase: {}, response: {} ", newPurchase, response);
-        return ResponseEntity.ok(response);
+        return response;
     }
 }
