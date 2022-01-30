@@ -3,6 +3,7 @@ package ru.senin.pk.split.check.controllers.requests;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.senin.pk.split.check.validation.constraint.validator.UniqueIds;
 
 import javax.validation.constraints.*;
 import java.math.BigDecimal;
@@ -37,5 +38,6 @@ public class AddNewPurchaseRequest {
      */
     @NotNull
     @Size(min = 1, max = 100)
+    @UniqueIds
     private List<Long> consumers;
 }

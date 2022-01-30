@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.senin.pk.split.check.controllers.requests.AddNewCheckRequest;
 import ru.senin.pk.split.check.model.Check;
 import ru.senin.pk.split.check.model.CurrentUser;
+import ru.senin.pk.split.check.model.RegisteredUser;
 import ru.senin.pk.split.check.model.User;
 import ru.senin.pk.split.check.data.layer.repositories.UserRepository;
 import ru.senin.pk.split.check.controllers.responses.CheckResponse;
@@ -80,7 +81,7 @@ public class ChecksController {
         Check newCheck = new Check();
         newCheck.setName(request.getName());
         newCheck.setDate(request.getDate());
-        newCheck.setUsers(Stream.of(currentUser).collect(Collectors.toList()));
+        newCheck.setUsers(Stream.of(new RegisteredUser(currentUser.getId(), currentUser.getName())).collect(Collectors.toList()));
         newCheck.setPurchases(new ArrayList<>());
         currentUser.getChecks().add(newCheck);
         userRepository.saveCurrentUser(currentUser);
