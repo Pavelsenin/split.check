@@ -194,10 +194,4 @@ public class ChecksController {
         CheckResponse view = conversionService.convert(check, CheckResponse.class);
         return ResponseEntity.ok(view);
     }
-
-    @ExceptionHandler
-    public ResponseEntity handleException(Exception ex) {
-        LOGGER.error("Error: ", ex);
-        return ResponseEntity.internalServerError().build();
-    }
 }

@@ -44,10 +44,4 @@ public class UsersController {
         UserResponse view = conversionService.convert(currentUser, UserResponse.class);
         return ResponseEntity.ok(view);
     }
-
-    @ExceptionHandler
-    public ResponseEntity handleException(Exception ex) {
-        LOGGER.error("Error: ", ex);
-        return ResponseEntity.internalServerError().build();
-    }
 }
