@@ -35,4 +35,9 @@ public class Check {
      * Check users ids
      */
     private List<User> users;
+
+    /**
+     * Check transfers
+     */
+    private List<Transfer> transfers;
 }
