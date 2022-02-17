@@ -1,9 +1,11 @@
-package ru.senin.pk.split.check.validation;
+package ru.senin.pk.split.check.controllers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.senin.pk.split.check.validation.FieldValidationError;
+import ru.senin.pk.split.check.controllers.responses.ErrorResponse;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -21,14 +23,14 @@ public class RestConstraintViolationExceptionHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ValidationErrorResponse handleException(ConstraintViolationException ex) {
+    public ErrorResponse handleException(ConstraintViolationException ex) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Handling constraint validation exception: ", ex);
         }
         List<FieldValidationError> fieldValidationErrors = ex.getConstraintViolations().stream()
                 .map(this::transformViolation)
                 .collect(Collectors.toList());
-        return new ValidationErrorResponse("Invalid request parameters", fieldValidationErrors);
+        return new ErrorResponse("Invalid request parameters", fieldValidationErrors);
     }
 
     private FieldValidationError transformViolation(ConstraintViolation violation) {

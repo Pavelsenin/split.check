@@ -26,7 +26,7 @@ public class CheckDaoJdbcImpl implements CheckDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private static final String GET_CHECKS_SQL = "select id, name, date from CHECKS where id=?;";
+    private static final String GET_CHECKS_SQL = "SELECT id, name, date FROM checks WHERE id=?;";
 
     @Override
     public Optional<CheckEntity> getCheckById(Long checkId) {
@@ -62,7 +62,7 @@ public class CheckDaoJdbcImpl implements CheckDao {
         }
     }
 
-    private static final String CREATE_CHECK_SQL = "insert into CHECKS (name, date) values (?, ?);";
+    private static final String CREATE_CHECK_SQL = "INSERT INTO checks (name, date) VALUES (?, ?);";
 
     private void createChecksJdbc(CheckEntity entity) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -75,7 +75,7 @@ public class CheckDaoJdbcImpl implements CheckDao {
         entity.setId(keyHolder.getKey().longValue());
     }
 
-    private static final String UPDATE_CHECKS_SQL = "update CHECKS set name=?, date=? where id=?;";
+    private static final String UPDATE_CHECKS_SQL = "UPDATE checks SET name=?, date=? WHERE id=?;";
 
     private void updateChecksJdbc(CheckEntity entity) {
         jdbcTemplate.update(UPDATE_CHECKS_SQL, ps -> {

@@ -26,10 +26,12 @@ public class UserDaoJdbcImpl implements UserDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    private static final String GET_USERS_BY_ID_SQL = "SELECT id, name FROM users WHERE id=?;";
+
     @Override
     public UserEntity getUserById(Long userId) {
         // TODO test join vs several queries performance
-        SqlRowSet usersRowSet = jdbcTemplate.queryForRowSet("select id, name from USERS where id=?", userId);
+        SqlRowSet usersRowSet = jdbcTemplate.queryForRowSet(GET_USERS_BY_ID_SQL, userId);
         if (!usersRowSet.next()) {
             return null;
         }
@@ -59,7 +61,7 @@ public class UserDaoJdbcImpl implements UserDao {
         }
     }
 
-    private static final String CREATE_USER_SQL = "insert into USERS (name) values (?);";
+    private static final String CREATE_USER_SQL = "INSERT INTO users (name) VALUES (?);";
 
     private void createUserJdbc(UserEntity entity) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -71,7 +73,7 @@ public class UserDaoJdbcImpl implements UserDao {
         entity.setId(keyHolder.getKey().longValue());
     }
 
-    private static final String UPDATE_USER_SQL = "update USERS set name=? where id=?;";
+    private static final String UPDATE_USER_SQL = "UPDATE USERS SET name=? WHERE id=?;";
 
     private void updateUserJdbc(UserEntity entity) {
         jdbcTemplate.update(UPDATE_USER_SQL, ps -> {

@@ -1,4 +1,4 @@
-package ru.senin.pk.split.check.validation;
+package ru.senin.pk.split.check.errors;
 
 /**
  * Unified service validation exception

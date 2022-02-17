@@ -1,4 +1,4 @@
-package ru.senin.pk.split.check.validation;
+package ru.senin.pk.split.check.controllers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.senin.pk.split.check.controllers.responses.ErrorResponse;
 
 
 /**
@@ -21,10 +22,10 @@ public class RestHttpMessageNotReadableExceptionHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ValidationErrorResponse handleException(HttpMessageNotReadableException ex) {
+    public ErrorResponse handleException(HttpMessageNotReadableException ex) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Handling http message not readable exception: ", ex);
         }
-        return new ValidationErrorResponse("Invalid request parameters");
+        return new ErrorResponse("Invalid request parameters");
     }
 }

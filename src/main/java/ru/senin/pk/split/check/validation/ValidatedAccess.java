@@ -3,6 +3,7 @@ package ru.senin.pk.split.check.validation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import ru.senin.pk.split.check.errors.ServiceValidationException;
 import ru.senin.pk.split.check.model.Check;
 import ru.senin.pk.split.check.model.CurrentUser;
 import ru.senin.pk.split.check.model.User;

@@ -180,6 +180,32 @@ public class CheckTransfersServiceTest {
                                 transfer(user(1L), user(4L), new BigDecimal("1267.25"))
                         )
                 },
+                {
+                        Lists.newArrayList(user(1L), user(2L), user(3L), user(4L)),
+                        Lists.newArrayList(
+                                purchase(new BigDecimal("9420.00"), user(1L), Lists.newArrayList(user(1L), user(2L), user(3L))),
+                                purchase(new BigDecimal("1278.00"), user(1L), Lists.newArrayList(user(1L), user(2L))),
+                                purchase(new BigDecimal("2346.00"), user(4L), Lists.newArrayList(user(1L), user(2L), user(3L), user(4L))),
+                                purchase(new BigDecimal("858.00"), user(4L), Lists.newArrayList(user(1L), user(2L), user(3L), user(4L))),
+                                purchase(new BigDecimal("2260.00"), user(4L), Lists.newArrayList(user(1L), user(2L), user(3L), user(4L))),
+                                purchase(new BigDecimal("622.00"), user(4L), Lists.newArrayList(user(1L), user(2L), user(3L), user(4L))),
+                                purchase(new BigDecimal("3720.00"), user(4L), Lists.newArrayList(user(1L), user(2L), user(3L), user(4L))),
+                                purchase(new BigDecimal("3837.00"), user(1L), Lists.newArrayList(user(1L), user(2L), user(3L), user(4L))),
+                                purchase(new BigDecimal("4800.00"), user(1L), Lists.newArrayList(user(1L), user(2L), user(3L), user(4L))),
+                                purchase(new BigDecimal("2700.00"), user(1L), Lists.newArrayList(user(1L), user(2L), user(3L), user(4L))),
+                                purchase(new BigDecimal("8230.00"), user(3L), Lists.newArrayList(user(1L), user(2L), user(3L), user(4L))),
+                                purchase(new BigDecimal("738.00"), user(2L), Lists.newArrayList(user(1L), user(2L), user(3L), user(4L))),
+                                purchase(new BigDecimal("2769.00"), user(4L), Lists.newArrayList(user(1L), user(2L), user(3L), user(4L))),
+                                purchase(new BigDecimal("2432.00"), user(2L), Lists.newArrayList(user(1L), user(2L), user(3L), user(4L))),
+                                purchase(new BigDecimal("193.00"), user(2L), Lists.newArrayList(user(2L), user(3L)))
+
+                        ),
+                        Lists.newArrayList(
+                                transfer(user(1L), user(2L), new BigDecimal("9340.50")),
+                                transfer(user(1L), user(3L), new BigDecimal("87.50")),
+                                transfer(user(4L), user(3L), new BigDecimal("3747.00"))
+                        )
+                },
         };
     }
 

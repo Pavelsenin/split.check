@@ -5,6 +5,13 @@ insert into USERS (name) values ('sample_user_2');
 insert into USERS (name) values ('sample_user_3');
 insert into USERS (name) values ('sample_user_4');
 
+delete from USERS_AUTH;
+
+insert into USERS_AUTH (username, password, user_id) values ('sample_username_1', '111', 1);
+insert into USERS_AUTH (username, password, user_id) values ('sample_username_2', '222', 2);
+insert into USERS_AUTH (username, password, user_id) values ('sample_username_3', '333', 3);
+insert into USERS_AUTH (username, password, user_id) values ('sample_username_4', '444', 4);
+
 delete from CHECKS;
 
 insert into CHECKS (name, date) values ('sample_check_1', '2021-12-31');

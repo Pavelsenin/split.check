@@ -1,4 +1,4 @@
-package ru.senin.pk.split.check.validation;
+package ru.senin.pk.split.check.controllers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

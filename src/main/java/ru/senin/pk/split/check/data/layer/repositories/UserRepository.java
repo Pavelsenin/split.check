@@ -6,11 +6,27 @@ import ru.senin.pk.split.check.model.User;
 public interface UserRepository {
 
     /**
+     * Get current user by username
+     *
+     * @param username
+     * @return
+     */
+    CurrentUser getCurrentUserByUsername(String username);
+
+    /**
      * Get current user
      *
      * @return
      */
     CurrentUser getCurrentUser();
+
+    /**
+     * Get current user by id
+     *
+     * @param id
+     * @return
+     */
+    CurrentUser getCurrentUserById(Long id);
 
     /**
      * Get user by id

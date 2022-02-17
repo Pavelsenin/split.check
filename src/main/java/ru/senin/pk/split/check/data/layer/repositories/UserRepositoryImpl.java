@@ -8,6 +8,7 @@ import ru.senin.pk.split.check.auth.CurrentUserService;
 import ru.senin.pk.split.check.data.layer.dao.*;
 import ru.senin.pk.split.check.data.layer.entities.CheckEntity;
 import ru.senin.pk.split.check.data.layer.entities.PurchaseEntity;
+import ru.senin.pk.split.check.data.layer.entities.UserAuthEntity;
 import ru.senin.pk.split.check.data.layer.entities.UserEntity;
 import ru.senin.pk.split.check.model.*;
 
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 public class UserRepositoryImpl implements UserRepository {
 
     private final UserDao userDao;
+
+    private final UserAuthDao userAuthDao;
 
     private final CheckDao checkDao;
 
@@ -35,8 +38,10 @@ public class UserRepositoryImpl implements UserRepository {
 
     private final ConversionService conversionService;
 
-    public UserRepositoryImpl(UserDao userDao, CheckDao checkDao, PurchaseDao purchaseDao, UserChecksDao userChecksDao, ChecksPurchasesDao checksPurchasesDao, PurchasesPayersDao purchasesPayersDao, PurchasesConsumersDao purchasesConsumersDao, CurrentUserService currentUserService, ConversionService conversionService) {
+    @Autowired
+    public UserRepositoryImpl(UserDao userDao, UserAuthDao userAuthDao, CheckDao checkDao, PurchaseDao purchaseDao, UserChecksDao userChecksDao, ChecksPurchasesDao checksPurchasesDao, PurchasesPayersDao purchasesPayersDao, PurchasesConsumersDao purchasesConsumersDao, CurrentUserService currentUserService, ConversionService conversionService) {
         this.userDao = userDao;
+        this.userAuthDao = userAuthDao;
         this.checkDao = checkDao;
         this.purchaseDao = purchaseDao;
         this.userChecksDao = userChecksDao;
@@ -47,8 +52,17 @@ public class UserRepositoryImpl implements UserRepository {
         this.conversionService = conversionService;
     }
 
-    @Autowired
-
+    @Override
+    public CurrentUser getCurrentUserByUsername(String username) {
+        UserAuthEntity userAuthEntity = userAuthDao.getUserAuthByUsername(username);
+        if (Objects.isNull(userAuthEntity)) {
+            return null;
+        }
+        UserAuth userAuth = conversionService.convert(userAuthEntity, UserAuth.class);
+        CurrentUser currentUser = getCurrentUserById(userAuthEntity.getUserId());
+        currentUser.setAuth(userAuth);
+        return currentUser;
+    }
 
     @Override
     public CurrentUser getCurrentUser() {
@@ -56,7 +70,12 @@ public class UserRepositoryImpl implements UserRepository {
         if (Objects.isNull(currentUserId)) {
             return null;
         }
-        UserEntity userEntity = userDao.getUserById(currentUserId);
+        return getCurrentUserById(currentUserId);
+    }
+
+    @Override
+    public CurrentUser getCurrentUserById(Long id) {
+        UserEntity userEntity = userDao.getUserById(id);
         if (Objects.isNull(userEntity)) {
             return null;
         }
@@ -69,7 +88,6 @@ public class UserRepositoryImpl implements UserRepository {
                 .map(entity -> conversionService.convert(entity, Check.class))
                 .collect(Collectors.toList());
         currentUser.setChecks(checks);
-        //
 
         for (Check check : checks) {
             // Receive check users
@@ -164,5 +182,10 @@ public class UserRepositoryImpl implements UserRepository {
                 .map(Check::getId)
                 .collect(Collectors.toList());
         userChecksDao.setChecks(checkIds, userEntity.getId());
+
+        UserAuth auth = user.getAuth();
+        UserAuthEntity authEntity = conversionService.convert(auth, UserAuthEntity.class);
+        authEntity.setUserId(userEntity.getId());
+        userAuthDao.saveUserAuth(authEntity);
     }
 }

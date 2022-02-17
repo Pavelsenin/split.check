@@ -30,7 +30,7 @@ public class PurchaseDaoJdbcImpl implements PurchaseDao {
     @Override
     public Optional<PurchaseEntity> getPurchaseById(Long purchaseId) {
         // TODO test join vs several queries performance
-        SqlRowSet purchaseRowSet = jdbcTemplate.queryForRowSet("select id, name, cost from PURCHASES where id=?", purchaseId);
+        SqlRowSet purchaseRowSet = jdbcTemplate.queryForRowSet("SELECT id, name, cost FROM purchases WHERE id=?", purchaseId);
         if (!purchaseRowSet.next()) {
             return Optional.empty();
         }
@@ -62,7 +62,7 @@ public class PurchaseDaoJdbcImpl implements PurchaseDao {
         }
     }
 
-    private static final String CREATE_PURCHASE_SQL = "insert into PURCHASES (name, cost) values (?, ?);";
+    private static final String CREATE_PURCHASE_SQL = "INSERT INTO purchases (name, cost) VALUES (?, ?);";
 
     private void createPurchaseJdbc(PurchaseEntity entity) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -75,7 +75,7 @@ public class PurchaseDaoJdbcImpl implements PurchaseDao {
         entity.setId(keyHolder.getKey().longValue());
     }
 
-    private static final String UPDATE_PURCHASE_SQL = "update PURCHASES set name=?, cost=? where id=?;";
+    private static final String UPDATE_PURCHASE_SQL = "UPDATE purchases SET name=?, cost=? WHERE id=?;";
 
     private void updatePurchaseJdbc(PurchaseEntity entity) {
         jdbcTemplate.update(UPDATE_PURCHASE_SQL, ps -> {

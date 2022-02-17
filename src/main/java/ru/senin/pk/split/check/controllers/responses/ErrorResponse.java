@@ -1,9 +1,10 @@
-package ru.senin.pk.split.check.validation;
+package ru.senin.pk.split.check.controllers.responses;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import ru.senin.pk.split.check.validation.FieldValidationError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,13 +15,13 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ValidationErrorResponse {
+public class ErrorResponse {
 
     private String message;
 
     private List<FieldValidationError> fieldErrors = new ArrayList<>();
 
-    public ValidationErrorResponse(String message) {
+    public ErrorResponse(String message) {
         this.message = message;
     }
 }

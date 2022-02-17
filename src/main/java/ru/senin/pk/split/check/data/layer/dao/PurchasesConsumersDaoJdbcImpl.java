@@ -20,16 +20,16 @@ public class PurchasesConsumersDaoJdbcImpl implements PurchasesConsumersDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private static final String SELECT_USER_IDS_SQL = "select user_id from PURCHASES_CONSUMERS where purchase_id=?;";
+    private static final String SELECT_USER_IDS_SQL = "SELECT user_id FROM purchases_consumers WHERE purchase_id=?;";
 
     @Override
     public List<Long> getConsumerUsers(Long purchaseId) {
         return jdbcTemplate.queryForList(SELECT_USER_IDS_SQL, Long.class, purchaseId);
     }
 
-    private static final String DELETE_BY_PURCHASE_ID_SQL = "delete from PURCHASES_CONSUMERS where purchase_id=?;";
+    private static final String DELETE_BY_PURCHASE_ID_SQL = "DELETE FROM purchases_consumers WHERE purchase_id=?;";
 
-    private static final String INSERT_SQL = "insert into PURCHASES_CONSUMERS (purchase_id, user_id) values (?, ?);";
+    private static final String INSERT_SQL = "INSERT INTO purchases_consumers (purchase_id, user_id) VALUES (?, ?);";
 
     @Override
     public void setConsumerUsers(List<Long> userIds, Long purchaseId) {

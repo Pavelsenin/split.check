@@ -19,16 +19,16 @@ public class ChecksPurchasesDaoJdbcImpl implements ChecksPurchasesDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private static final String GET_PURCHASES_IDS_SQL = "select purchase_id from CHECKS_PURCHASES where check_id=?;";
+    private static final String GET_PURCHASES_IDS_SQL = "SELECT purchase_id FROM checks_purchases WHERE check_id=?;";
 
     @Override
     public List<Long> getPurchases(Long checkId) {
         return jdbcTemplate.queryForList(GET_PURCHASES_IDS_SQL, Long.class, checkId);
     }
 
-    private static final String DELETE_PURCHASE_IDS_BY_CHECK_ID_SQL = "delete from CHECKS_PURCHASES where check_id=?";
+    private static final String DELETE_PURCHASE_IDS_BY_CHECK_ID_SQL = "DELETE FROM checks_purchases WHERE check_id=?";
 
-    private static final String INSERT_SQL = "insert into CHECKS_PURCHASES (check_id, purchase_id) values (?, ?)";
+    private static final String INSERT_SQL = "INSERT INTO checks_purchases (check_id, purchase_id) VALUES (?, ?)";
 
     @Override
     public void setPurchases(List<Long> purchaseIds, Long checkId) {
