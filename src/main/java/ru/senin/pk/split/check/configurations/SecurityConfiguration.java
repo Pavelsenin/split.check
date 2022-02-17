@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @EnableWebSecurity
@@ -38,6 +37,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.headers().frameOptions().sameOrigin();
-        http.authorizeRequests().antMatchers("/", "/**").permitAll();
+        http.authorizeRequests()
+                .antMatchers("/*")
+                .denyAll();
+        http.authorizeRequests()
+                .antMatchers("/auth/signup")
+                .permitAll();
+        http.authorizeRequests()
+                .antMatchers("/auth/signout", "/users/*", "/checks/*", "/purchases/*")
+                .authenticated()
+                .and().httpBasic();
+
     }
 }

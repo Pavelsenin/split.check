@@ -9,32 +9,9 @@ public interface UserRepository {
      * Get current user by username
      *
      * @param username
-     * @return
+     * @return CurrentUser or null if not found
      */
     CurrentUser getCurrentUserByUsername(String username);
-
-    /**
-     * Get current user
-     *
-     * @return
-     */
-    CurrentUser getCurrentUser();
-
-    /**
-     * Get current user by id
-     *
-     * @param id
-     * @return
-     */
-    CurrentUser getCurrentUserById(Long id);
-
-    /**
-     * Get user by id
-     *
-     * @param userId
-     * @return
-     */
-    User getUser(Long userId);
 
     /**
      * Updates current user and connected entices
@@ -43,4 +20,12 @@ public interface UserRepository {
      * @return
      */
     void saveCurrentUser(CurrentUser user);
+
+    /**
+     * Get user by id
+     *
+     * @param userId
+     * @return
+     */
+    User getUser(Long userId);
 }

@@ -1,10 +1,11 @@
 package ru.senin.pk.split.check.data.layer.repositories;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import ru.senin.pk.split.check.auth.CurrentUserService;
 import ru.senin.pk.split.check.data.layer.dao.*;
 import ru.senin.pk.split.check.data.layer.entities.CheckEntity;
 import ru.senin.pk.split.check.data.layer.entities.PurchaseEntity;
@@ -34,12 +35,12 @@ public class UserRepositoryImpl implements UserRepository {
 
     private final PurchasesConsumersDao purchasesConsumersDao;
 
-    private final CurrentUserService currentUserService;
-
     private final ConversionService conversionService;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserRepositoryImpl.class);
+
     @Autowired
-    public UserRepositoryImpl(UserDao userDao, UserAuthDao userAuthDao, CheckDao checkDao, PurchaseDao purchaseDao, UserChecksDao userChecksDao, ChecksPurchasesDao checksPurchasesDao, PurchasesPayersDao purchasesPayersDao, PurchasesConsumersDao purchasesConsumersDao, CurrentUserService currentUserService, ConversionService conversionService) {
+    public UserRepositoryImpl(UserDao userDao, UserAuthDao userAuthDao, CheckDao checkDao, PurchaseDao purchaseDao, UserChecksDao userChecksDao, ChecksPurchasesDao checksPurchasesDao, PurchasesPayersDao purchasesPayersDao, PurchasesConsumersDao purchasesConsumersDao, ConversionService conversionService) {
         this.userDao = userDao;
         this.userAuthDao = userAuthDao;
         this.checkDao = checkDao;
@@ -48,35 +49,29 @@ public class UserRepositoryImpl implements UserRepository {
         this.checksPurchasesDao = checksPurchasesDao;
         this.purchasesPayersDao = purchasesPayersDao;
         this.purchasesConsumersDao = purchasesConsumersDao;
-        this.currentUserService = currentUserService;
         this.conversionService = conversionService;
     }
 
     @Override
     public CurrentUser getCurrentUserByUsername(String username) {
+        LOGGER.info("Get current user by username. username: {}", username);
         UserAuthEntity userAuthEntity = userAuthDao.getUserAuthByUsername(username);
         if (Objects.isNull(userAuthEntity)) {
+            LOGGER.info("Current user not found by username. username: {}", username);
             return null;
         }
         UserAuth userAuth = conversionService.convert(userAuthEntity, UserAuth.class);
         CurrentUser currentUser = getCurrentUserById(userAuthEntity.getUserId());
         currentUser.setAuth(userAuth);
+        LOGGER.info("Current user found by username. currentUser: {}", currentUser);
         return currentUser;
     }
 
-    @Override
-    public CurrentUser getCurrentUser() {
-        Long currentUserId = currentUserService.getCurrentUserId();
-        if (Objects.isNull(currentUserId)) {
-            return null;
-        }
-        return getCurrentUserById(currentUserId);
-    }
-
-    @Override
-    public CurrentUser getCurrentUserById(Long id) {
+    private CurrentUser getCurrentUserById(Long id) {
+        LOGGER.info("Get current user by id. id: {}", id);
         UserEntity userEntity = userDao.getUserById(id);
         if (Objects.isNull(userEntity)) {
+            LOGGER.info("Current user not found by id. id: {}", id);
             return null;
         }
         CurrentUser currentUser = conversionService.convert(userEntity, CurrentUser.class);
@@ -126,29 +121,17 @@ public class UserRepositoryImpl implements UserRepository {
                 //
             }
         }
-
+        LOGGER.info("Current user found by id. currentUser: {}", currentUser);
         return currentUser;
-    }
-
-    @Override
-    public User getUser(Long userId) {
-        if (Objects.isNull(userId)) {
-            return null;
-        }
-        UserEntity userEntity = userDao.getUserById(userId);
-        if (Objects.isNull(userEntity)) {
-            return null;
-        }
-        RegisteredUser user = conversionService.convert(userEntity, RegisteredUser.class);
-        return user;
     }
 
     @Transactional
     @Override
-    public void saveCurrentUser(CurrentUser user) {
-        UserEntity userEntity = conversionService.convert(user, UserEntity.class);
+    public void saveCurrentUser(CurrentUser currentUser) {
+        LOGGER.info("Save current user. currentUser: {}", currentUser);
+        UserEntity userEntity = conversionService.convert(currentUser, UserEntity.class);
         userDao.saveUser(userEntity);
-        for (Check check : user.getChecks()) {
+        for (Check check : currentUser.getChecks()) {
             CheckEntity checkEntity = conversionService.convert(check, CheckEntity.class);
             checkDao.saveCheck(checkEntity);
             check.setId(checkEntity.getId());
@@ -178,14 +161,31 @@ public class UserRepositoryImpl implements UserRepository {
 
         }
 
-        List<Long> checkIds = user.getChecks().stream()
+        List<Long> checkIds = currentUser.getChecks().stream()
                 .map(Check::getId)
                 .collect(Collectors.toList());
         userChecksDao.setChecks(checkIds, userEntity.getId());
 
-        UserAuth auth = user.getAuth();
+        UserAuth auth = currentUser.getAuth();
         UserAuthEntity authEntity = conversionService.convert(auth, UserAuthEntity.class);
         authEntity.setUserId(userEntity.getId());
         userAuthDao.saveUserAuth(authEntity);
+        LOGGER.info("Current user saved. currentUser: {}", currentUser);
+    }
+
+    @Override
+    public User getUser(Long id) {
+        LOGGER.info("Get user by id. id: {}", id);
+        if (Objects.isNull(id)) {
+            return null;
+        }
+        UserEntity userEntity = userDao.getUserById(id);
+        if (Objects.isNull(userEntity)) {
+            LOGGER.info("User not found by id. id: {}", id);
+            return null;
+        }
+        RegisteredUser user = conversionService.convert(userEntity, RegisteredUser.class);
+        LOGGER.info("User  found by id. user: {}", user);
+        return user;
     }
 }

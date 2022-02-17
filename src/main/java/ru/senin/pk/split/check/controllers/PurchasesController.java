@@ -13,6 +13,7 @@ import ru.senin.pk.split.check.model.CurrentUser;
 import ru.senin.pk.split.check.model.Purchase;
 import ru.senin.pk.split.check.model.User;
 import ru.senin.pk.split.check.controllers.responses.PurchaseResponse;
+import ru.senin.pk.split.check.services.UserAuthService;
 import ru.senin.pk.split.check.validation.ValidatedAccess;
 
 import javax.validation.*;
@@ -26,6 +27,8 @@ import java.util.stream.Collectors;
 @Validated
 public class PurchasesController {
 
+    private final UserAuthService userAuthService;
+
     private final UserRepository userRepository;
 
     private final ConversionService conversionService;
@@ -35,7 +38,8 @@ public class PurchasesController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PurchasesController.class);
 
     @Autowired
-    public PurchasesController(UserRepository userRepository, ConversionService conversionService, ValidatedAccess validatedAccess) {
+    public PurchasesController(UserAuthService userAuthService, UserRepository userRepository, ConversionService conversionService, ValidatedAccess validatedAccess) {
+        this.userAuthService = userAuthService;
         this.userRepository = userRepository;
         this.conversionService = conversionService;
         this.validatedAccess = validatedAccess;
@@ -47,7 +51,7 @@ public class PurchasesController {
             @RequestParam("check_id") Long checkId
     ) {
         LOGGER.info("Get purchases. checkId: {}", checkId);
-        CurrentUser currentUser = userRepository.getCurrentUser();
+        CurrentUser currentUser = userAuthService.getCurrentUser();
         validatedAccess.validateCurrentUser(currentUser);
         Check check = validatedAccess.getCurrentUserCheck(currentUser, checkId);
         List<Purchase> purchases = check.getPurchases();
@@ -73,7 +77,7 @@ public class PurchasesController {
             @RequestBody @Valid AddNewPurchaseRequest request
     ) {
         LOGGER.info("Add new purchase. checkId: {}, request: {}", checkId, request);
-        CurrentUser currentUser = userRepository.getCurrentUser();
+        CurrentUser currentUser = userAuthService.getCurrentUser();
         validatedAccess.validateCurrentUser(currentUser);
         Check check = validatedAccess.getCurrentUserCheck(currentUser, checkId);
 

@@ -14,6 +14,7 @@ import ru.senin.pk.split.check.model.User;
 import ru.senin.pk.split.check.data.layer.repositories.UserRepository;
 import ru.senin.pk.split.check.controllers.responses.CheckResponse;
 import ru.senin.pk.split.check.services.CheckTransfersService;
+import ru.senin.pk.split.check.services.UserAuthService;
 import ru.senin.pk.split.check.validation.ValidatedAccess;
 
 import javax.validation.Valid;
@@ -27,6 +28,8 @@ import java.util.stream.Stream;
 @Validated
 public class ChecksController {
 
+    private final UserAuthService userAuthService;
+
     private final UserRepository userRepository;
 
     private final ConversionService conversionService;
@@ -38,7 +41,8 @@ public class ChecksController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChecksController.class);
 
     @Autowired
-    public ChecksController(UserRepository userRepository, ConversionService conversionService, ValidatedAccess validatedAccess, CheckTransfersService checkTransfersService) {
+    public ChecksController(UserAuthService userAuthService, UserRepository userRepository, ConversionService conversionService, ValidatedAccess validatedAccess, CheckTransfersService checkTransfersService) {
+        this.userAuthService = userAuthService;
         this.userRepository = userRepository;
         this.conversionService = conversionService;
         this.validatedAccess = validatedAccess;
@@ -55,7 +59,7 @@ public class ChecksController {
     @ResponseBody
     public List<CheckResponse> getCurrentUserChecks() {
         LOGGER.info("Get current user checks");
-        CurrentUser currentUser = userRepository.getCurrentUser();
+        CurrentUser currentUser = userAuthService.getCurrentUser();
         validatedAccess.validateCurrentUser(currentUser);
         List<Check> checks = currentUser.getChecks();
         checks.stream().forEach(checkTransfersService::calculateTransfers);
@@ -80,7 +84,7 @@ public class ChecksController {
             @RequestBody @Valid AddNewCheckRequest request
     ) {
         LOGGER.info("Add new check. request: {}", request);
-        CurrentUser currentUser = userRepository.getCurrentUser();
+        CurrentUser currentUser = userAuthService.getCurrentUser();
         validatedAccess.validateCurrentUser(currentUser);
 
         Check newCheck = new Check();
@@ -113,7 +117,7 @@ public class ChecksController {
             @RequestParam("new_user_id") Long newUserId
     ) {
         LOGGER.info("Add check user. checkId: {}, newUserId", checkId, newUserId);
-        CurrentUser currentUser = userRepository.getCurrentUser();
+        CurrentUser currentUser = userAuthService.getCurrentUser();
         validatedAccess.validateCurrentUser(currentUser);
         Check check = validatedAccess.getCurrentUserCheck(currentUser, checkId);
         boolean userAlreadyAdded = check.getUsers().stream()
@@ -150,7 +154,7 @@ public class ChecksController {
             @RequestParam("remove_user_id") Long removeUserId
     ) {
         LOGGER.info("Remove check user. checkId: {}, removeUserId", checkId, removeUserId);
-        CurrentUser currentUser = userRepository.getCurrentUser();
+        CurrentUser currentUser = userAuthService.getCurrentUser();
         validatedAccess.validateCurrentUser(currentUser);
         Check check = validatedAccess.getCurrentUserCheck(currentUser, checkId);
         Optional<User> userToRemoveOpt = check.getUsers().stream()
