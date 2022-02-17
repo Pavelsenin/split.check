@@ -31,13 +31,16 @@ public class AuthController {
 
     private final UserRepository userRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
     private final UserAuthService userAuthService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
-    public AuthController(UserRepository userRepository, UserAuthService userAuthService) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, UserAuthService userAuthService) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
         this.userAuthService = userAuthService;
     }
 
@@ -50,7 +53,7 @@ public class AuthController {
         UserAuth auth = new UserAuth();
         user.setAuth(auth);
         auth.setUsername(request.getUsername());
-        auth.setPassword(request.getPassword());
+        auth.setPassword(passwordEncoder.encode(request.getPassword()));
         SignUpResponse response;
         userAuthService.userSignUp(user);
         response = new SignUpResponse(true);
