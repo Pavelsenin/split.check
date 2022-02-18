@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -55,10 +54,12 @@ public class AuthController {
     }
 
     @ExceptionHandler
-    public ResponseEntity<ErrorResponse> handleUserAlreadyExist(UserAlreadyExistsException e) {
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseBody
+    public ErrorResponse handleUserAlreadyExist(UserAlreadyExistsException e) {
         ErrorResponse response = new ErrorResponse(e.getMessage());
         LOGGER.info("User sign up failed, user already exists. response: {}", response);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        return response;
     }
 
     @PostMapping(path = "/signout")

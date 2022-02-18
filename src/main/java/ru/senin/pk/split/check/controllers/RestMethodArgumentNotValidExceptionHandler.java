@@ -29,7 +29,7 @@ public class RestMethodArgumentNotValidExceptionHandler {
     @ResponseBody
     public ErrorResponse handleException(MethodArgumentNotValidException ex) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Handling method argument not valid exception: ", ex);
+            LOGGER.info("Handling method argument not valid exception: {}", ex.getMessage());
         }
         List<FieldValidationError> fieldValidationErrors = ex.getAllErrors().stream()
                 .map(this::transformObjectError)

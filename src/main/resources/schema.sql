@@ -1,58 +1,58 @@
-create table if not exists USERS (
-    id bigint identity(1, 1),
-    name varchar(25) not null,
-    constraint USERS_PK primary key (id)
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT IDENTITY(1, 1),
+    name VARCHAR(25) NOT NULL,
+    CONSTRAINT users_pk PRIMARY KEY (id)
 );
 
-create table if not exists USERS_AUTH (
-    username varchar(25) not null,
-    password varchar(120) not null,
-    user_id bigint,
-    constraint USERS_AUTH_PK primary key (username, user_id),
-    constraint USERS_AUTH_FK foreign key (user_id) references USERS(id)
+CREATE TABLE IF NOT EXISTS users_auth (
+    username VARCHAR(25) NOT NULL,
+    password VARCHAR(60) NOT NULL,
+    user_id BIGINT,
+    CONSTRAINT users_auth_pk PRIMARY KEY (username, user_id),
+    CONSTRAINT users_auth_fk FOREIGN KEY (user_id) REFERENCES users(id)
 );
-create table if not exists CHECKS (
-    id bigint identity(1, 1),
-    name varchar(50) not null,
-    date datetime not null,
-    constraint CHECKS_PK primary key (id)
-);
-
-create table if not exists PURCHASES (
-    id bigint identity(1, 1),
-    name varchar(50) not null,
-    cost bigint not null,
-    constraint PURCHASES_PK primary key (id)
+CREATE TABLE IF NOT EXISTS checks (
+    id BIGINT IDENTITY(1, 1),
+    name VARCHAR(50) NOT NULL,
+    DATE datetime NOT NULL,
+    CONSTRAINT checks_pk PRIMARY KEY (id)
 );
 
-create table if not exists USERS_CHECKS (
-    user_id bigint,
-    check_id bigint,
-    constraint USERS_CHECKS_PK primary key (user_id, check_id),
-    constraint USERS_CHECKS_USERS_FK foreign key (user_id) references USERS(id),
-    constraint USERS_CHECKS_CHECKS_FK foreign key (check_id) references CHECKS(id)
+CREATE TABLE IF NOT EXISTS purchases (
+    id BIGINT IDENTITY(1, 1),
+    name VARCHAR(50) NOT NULL,
+    cost BIGINT NOT NULL,
+    CONSTRAINT purchases_pk PRIMARY KEY (id)
 );
 
-create table if not exists CHECKS_PURCHASES (
-    check_id bigint,
-    purchase_id bigint,
-    constraint CHECKS_PURCHASES_PK primary key (check_id, purchase_id),
-    constraint CHECKS_PURCHASES_CHECKS_FK foreign key (check_id) references CHECKS(id),
-    constraint CHECKS_PURCHASES_PURCHASES_FK foreign key (purchase_id) references PURCHASES(id)
+CREATE TABLE IF NOT EXISTS users_checks (
+    user_id BIGINT,
+    check_id BIGINT,
+    CONSTRAINT users_checks_PK PRIMARY KEY (user_id, check_id),
+    CONSTRAINT users_checks_users_fk FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT users_checks_checks_fk FOREIGN KEY (check_id) REFERENCES checks(id)
 );
 
-create table if not exists PURCHASES_PAYERS (
-    purchase_id bigint,
-    user_id bigint,
-    constraint PURCHASES_PAYERS_PK primary key (purchase_id, user_id),
-    constraint PURCHASES_PAYERS_PURCHASES_FK foreign key (purchase_id) references PURCHASES(id),
-    constraint PURCHASES_PAYERS_USERS_FK foreign key (user_id) references USERS(id)
+CREATE TABLE IF NOT EXISTS checks_purchases (
+    check_id BIGINT,
+    purchase_id BIGINT,
+    CONSTRAINT checks_purchases_pk PRIMARY KEY (check_id, purchase_id),
+    CONSTRAINT checks_purchases_checks_fk FOREIGN KEY (check_id) REFERENCES checks(id),
+    CONSTRAINT checks_purchases_purchases_fk FOREIGN KEY (purchase_id) REFERENCES purchases(id)
 );
 
-create table if not exists PURCHASES_CONSUMERS (
-    purchase_id bigint,
-    user_id bigint,
-    constraint PURCHASES_CONSUMERS_PK primary key (purchase_id, user_id),
-    constraint PURCHASES_CONSUMERS_PURCHASES_FK foreign key (purchase_id) references PURCHASES(id),
-    constraint PURCHASES_CONSUMERS_USERS_FK foreign key (user_id) references USERS(id)
+CREATE TABLE IF NOT EXISTS purchases_payers (
+    purchase_id BIGINT,
+    user_id BIGINT,
+    CONSTRAINT purchases_payers_pk PRIMARY KEY (purchase_id, user_id),
+    CONSTRAINT purchases_payers_purchases_fk FOREIGN KEY (purchase_id) REFERENCES purchases(id),
+    CONSTRAINT purchases_payers_users_fk FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS purchases_consumers (
+    purchase_id BIGINT,
+    user_id BIGINT,
+    CONSTRAINT purchases_consumers_pk PRIMARY KEY (purchase_id, user_id),
+    CONSTRAINT purchases_consumers_purchases_fk FOREIGN KEY (purchase_id) REFERENCES purchases(id),
+    CONSTRAINT purchases_consumers_users_fk FOREIGN KEY (user_id) REFERENCES users(id)
 );
