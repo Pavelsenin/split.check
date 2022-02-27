@@ -15,8 +15,12 @@ import ru.senin.pk.split.check.errors.UserAlreadyExistsException;
 import ru.senin.pk.split.check.model.CurrentUser;
 import ru.senin.pk.split.check.model.UserAuth;
 import ru.senin.pk.split.check.services.UserAuthService;
+import ru.senin.pk.split.check.validation.FieldValidationError;
 
 import javax.validation.Valid;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/auth", produces = "application/json")
@@ -57,7 +61,8 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CONFLICT)
     @ResponseBody
     public ErrorResponse handleUserAlreadyExist(UserAlreadyExistsException e) {
-        ErrorResponse response = new ErrorResponse(e.getMessage());
+        FieldValidationError fieldValidationError = new FieldValidationError("username", e.getMessage() + " " +e.getUsername());
+        ErrorResponse response = new ErrorResponse(e.getMessage(), Arrays.asList(fieldValidationError));
         LOGGER.info("User sign up failed, user already exists. response: {}", response);
         return response;
     }

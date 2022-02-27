@@ -4,11 +4,17 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import ru.senin.pk.split.check.controllers.responses.ErrorResponse;
 import ru.senin.pk.split.check.data.layer.repositories.UserRepository;
 import ru.senin.pk.split.check.errors.UserAlreadyExistsException;
 import ru.senin.pk.split.check.model.CurrentUser;
@@ -32,7 +38,7 @@ public class UserAuthServiceImpl implements UserAuthService, UserDetailsService 
     public CurrentUser signUpUser(CurrentUser user) {
         LOGGER.info("User sign up. user: {}", user);
         if (Objects.nonNull(userRepository.getCurrentUserByUsername(user.getAuth().getUsername()))) {
-            throw new UserAlreadyExistsException("Account with username already registered. username: " + user.getAuth().getUsername());
+            throw new UserAlreadyExistsException("Account with username already registered", user.getAuth().getUsername());
         }
         userRepository.saveCurrentUser(user);
         LOGGER.info("User signed up. user: {}", user);
@@ -59,7 +65,14 @@ public class UserAuthServiceImpl implements UserAuthService, UserDetailsService 
     @Override
     public UserAuth loadUserByUsername(String username) throws UsernameNotFoundException {
         LOGGER.info("Load user by username. username: {}", username);
-        CurrentUser user = userRepository.getCurrentUserByUsername(username);
+        CurrentUser user;
+        try {
+            user = userRepository.getCurrentUserByUsername(username);
+        } catch (Exception e) {
+            // Basic authentication service exceptions not logger explicitly
+            LOGGER.error("Internal authentication service error: ", e);
+            throw e;
+        }
         if (Objects.isNull(user)) {
             LOGGER.info("User not found by username. username: {}", username);
             throw new UsernameNotFoundException("User not found by username. username: " + username);

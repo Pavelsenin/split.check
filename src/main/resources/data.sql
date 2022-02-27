@@ -1,55 +1,57 @@
-delete from USERS;
+delete from users;
 
-insert into USERS (name) values ('sample_user_1');
-insert into USERS (name) values ('sample_user_2');
-insert into USERS (name) values ('sample_user_3');
-insert into USERS (name) values ('sample_user_4');
+insert into users (name) values ('sample_user_1');
+insert into users (name) values ('sample_user_2');
+insert into users (name) values ('sample_user_3');
+insert into users (name) values ('sample_user_4');
 
-delete from USERS_AUTH;
+delete from users_auth;
 
-insert into USERS_AUTH (username, password, user_id) values ('sample_username_1', '111', 1);
-insert into USERS_AUTH (username, password, user_id) values ('sample_username_2', '222', 2);
-insert into USERS_AUTH (username, password, user_id) values ('sample_username_3', '333', 3);
-insert into USERS_AUTH (username, password, user_id) values ('sample_username_4', '444', 4);
+insert into users_auth (username, password, user_id) values ('sample_username_1', '111', 1);
+insert into users_auth (username, password, user_id) values ('sample_username_2', '222', 2);
+insert into users_auth (username, password, user_id) values ('sample_username_3', '333', 3);
+insert into users_auth (username, password, user_id) values ('sample_username_4', '444', 4);
 
-delete from CHECKS;
+delete from friends_requests;
 
-insert into CHECKS (name, date) values ('sample_check_1', '2021-12-31');
-insert into CHECKS (name, date) values ('sample_check_2', '2021-12-31');
+delete from checks;
 
-delete from PURCHASES;
+insert into checks (name, date) values ('sample_check_1', '2021-12-31');
+insert into checks (name, date) values ('sample_check_2', '2021-12-31');
 
-insert into PURCHASES (name, cost) values ('sample_purchase_1', '100');
-insert into PURCHASES (name, cost) values ('sample_purchase_2', '200');
-insert into PURCHASES (name, cost) values ('sample_purchase_3', '300');
+delete from purchases;
 
-delete from USERS_CHECKS;
+insert into purchases (name, cost) values ('sample_purchase_1', '100');
+insert into purchases (name, cost) values ('sample_purchase_2', '200');
+insert into purchases (name, cost) values ('sample_purchase_3', '300');
 
-insert into USERS_CHECKS (user_id, check_id) values ('1', '1');
-insert into USERS_CHECKS (user_id, check_id) values ('2', '1');
-insert into USERS_CHECKS (user_id, check_id) values ('3', '1');
-insert into USERS_CHECKS (user_id, check_id) values ('1', '2');
+delete from users_checks;
 
-delete from CHECKS_PURCHASES;
+insert into users_checks (user_id, check_id) values ('1', '1');
+insert into users_checks (user_id, check_id) values ('2', '1');
+insert into users_checks (user_id, check_id) values ('3', '1');
+insert into users_checks (user_id, check_id) values ('1', '2');
 
-insert into CHECKS_PURCHASES (check_id, purchase_id) values ('1', '1');
-insert into CHECKS_PURCHASES (check_id, purchase_id) values ('1', '2');
-insert into CHECKS_PURCHASES (check_id, purchase_id) values ('1', '3');
+delete from checks_purchases;
 
-delete from PURCHASES_PAYERS;
+insert into checks_purchases (check_id, purchase_id) values ('1', '1');
+insert into checks_purchases (check_id, purchase_id) values ('1', '2');
+insert into checks_purchases (check_id, purchase_id) values ('1', '3');
 
-insert into PURCHASES_PAYERS (purchase_id, user_id) values ('1', '2');
-insert into PURCHASES_PAYERS (purchase_id, user_id) values ('2', '2');
-insert into PURCHASES_PAYERS (purchase_id, user_id) values ('3', '3');
+delete from purchases_payers;
 
-delete from PURCHASES_CONSUMERS;
+insert into purchases_payers (purchase_id, user_id) values ('1', '2');
+insert into purchases_payers (purchase_id, user_id) values ('2', '2');
+insert into purchases_payers (purchase_id, user_id) values ('3', '3');
 
-insert into PURCHASES_CONSUMERS (purchase_id, user_id) values ('1', '1');
-insert into PURCHASES_CONSUMERS (purchase_id, user_id) values ('1', '2');
-insert into PURCHASES_CONSUMERS (purchase_id, user_id) values ('1', '3');
-insert into PURCHASES_CONSUMERS (purchase_id, user_id) values ('2', '1');
-insert into PURCHASES_CONSUMERS (purchase_id, user_id) values ('2', '2');
-insert into PURCHASES_CONSUMERS (purchase_id, user_id) values ('2', '3');
-insert into PURCHASES_CONSUMERS (purchase_id, user_id) values ('3', '1');
-insert into PURCHASES_CONSUMERS (purchase_id, user_id) values ('3', '2');
-insert into PURCHASES_CONSUMERS (purchase_id, user_id) values ('3', '3');
+delete from purchases_consumers;
+
+insert into purchases_consumers (purchase_id, user_id) values ('1', '1');
+insert into purchases_consumers (purchase_id, user_id) values ('1', '2');
+insert into purchases_consumers (purchase_id, user_id) values ('1', '3');
+insert into purchases_consumers (purchase_id, user_id) values ('2', '1');
+insert into purchases_consumers (purchase_id, user_id) values ('2', '2');
+insert into purchases_consumers (purchase_id, user_id) values ('2', '3');
+insert into purchases_consumers (purchase_id, user_id) values ('3', '1');
+insert into purchases_consumers (purchase_id, user_id) values ('3', '2');
+insert into purchases_consumers (purchase_id, user_id) values ('3', '3');

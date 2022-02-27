@@ -4,19 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserResponse {
-    /**
-     * User id
-     */
-    private Long id;
+public class AddFriendResponse {
 
-    /**
-     * User name
-     */
-    private String name;
+    private Boolean success;
 }

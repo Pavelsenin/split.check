@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CheckResponse {
+public class GetCheckResponse {
     /**
      * Check id
      */

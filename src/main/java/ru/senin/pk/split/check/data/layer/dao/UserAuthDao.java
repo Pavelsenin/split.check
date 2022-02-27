@@ -11,7 +11,6 @@ public interface UserAuthDao {
      */
     UserAuthEntity getUserAuthByUsername(String username);
 
-
     /**
      * Save user auth info. If user id is blank, creates new
      *

@@ -12,7 +12,7 @@ import ru.senin.pk.split.check.model.CurrentUser;
 import ru.senin.pk.split.check.model.RegisteredUser;
 import ru.senin.pk.split.check.model.User;
 import ru.senin.pk.split.check.data.layer.repositories.UserRepository;
-import ru.senin.pk.split.check.controllers.responses.CheckResponse;
+import ru.senin.pk.split.check.controllers.responses.GetCheckResponse;
 import ru.senin.pk.split.check.services.CheckTransfersService;
 import ru.senin.pk.split.check.services.UserAuthService;
 import ru.senin.pk.split.check.validation.ValidatedAccess;
@@ -57,14 +57,14 @@ public class ChecksController {
      */
     @GetMapping(path = "/get")
     @ResponseBody
-    public List<CheckResponse> getCurrentUserChecks() {
+    public List<GetCheckResponse> getCurrentUserChecks() {
         LOGGER.info("Get current user checks");
         CurrentUser currentUser = userAuthService.getCurrentUser();
-        validatedAccess.validateCurrentUser(currentUser);
+        validatedAccess.validateCurrentUserFound(currentUser);
         List<Check> checks = currentUser.getChecks();
         checks.stream().forEach(checkTransfersService::calculateTransfers);
-        List<CheckResponse> response = currentUser.getChecks().stream()
-                .map(check -> conversionService.convert(check, CheckResponse.class))
+        List<GetCheckResponse> response = currentUser.getChecks().stream()
+                .map(check -> conversionService.convert(check, GetCheckResponse.class))
                 .collect(Collectors.toList());
         LOGGER.info("Checks found. checks: {}, response: {}", checks, response);
         return response;
@@ -80,12 +80,12 @@ public class ChecksController {
      */
     @PostMapping(path = "/new")
     @ResponseBody
-    public CheckResponse addNewCheck(
+    public GetCheckResponse addNewCheck(
             @RequestBody @Valid AddNewCheckRequest request
     ) {
         LOGGER.info("Add new check. request: {}", request);
         CurrentUser currentUser = userAuthService.getCurrentUser();
-        validatedAccess.validateCurrentUser(currentUser);
+        validatedAccess.validateCurrentUserFound(currentUser);
 
         Check newCheck = new Check();
         newCheck.setName(request.getName());
@@ -97,7 +97,7 @@ public class ChecksController {
         userRepository.saveCurrentUser(currentUser);
         checkTransfersService.calculateTransfers(newCheck);
 
-        CheckResponse response = conversionService.convert(newCheck, CheckResponse.class);
+        GetCheckResponse response = conversionService.convert(newCheck, GetCheckResponse.class);
         LOGGER.info("New check added. newCheck: {}, response: {}", newCheck, response);
         return response;
     }
@@ -112,29 +112,29 @@ public class ChecksController {
      */
     @PostMapping(path = "/add_user")
     @ResponseBody
-    public CheckResponse addCheckUser(
+    public GetCheckResponse addCheckUser(
             @RequestParam("check_id") Long checkId,
             @RequestParam("new_user_id") Long newUserId
     ) {
         LOGGER.info("Add check user. checkId: {}, newUserId", checkId, newUserId);
         CurrentUser currentUser = userAuthService.getCurrentUser();
-        validatedAccess.validateCurrentUser(currentUser);
+        validatedAccess.validateCurrentUserFound(currentUser);
         Check check = validatedAccess.getCurrentUserCheck(currentUser, checkId);
         boolean userAlreadyAdded = check.getUsers().stream()
                 .filter(x -> Objects.equals(newUserId, x.getId()))
                 .findAny()
                 .isPresent();
         if (userAlreadyAdded) {
-            CheckResponse response = conversionService.convert(check, CheckResponse.class);
+            GetCheckResponse response = conversionService.convert(check, GetCheckResponse.class);
             LOGGER.info("Check user already added. response: {}", response);
             return response;
         }
-        User newUser = userRepository.getUser(newUserId);
-        validatedAccess.validateUser(newUser);
+        User newUser = userRepository.getRegisteredUserById(newUserId);
+        validatedAccess.validateUserFound(newUser);
         check.getUsers().add(newUser);
         check.setPurchases(Collections.emptyList());
         userRepository.saveCurrentUser(currentUser);
-        CheckResponse response = conversionService.convert(check, CheckResponse.class);
+        GetCheckResponse response = conversionService.convert(check, GetCheckResponse.class);
         LOGGER.info("Check user added. response: {} ", response);
         return response;
     }
@@ -149,25 +149,25 @@ public class ChecksController {
      */
     @PostMapping(path = "/remove_user")
     @ResponseBody
-    public CheckResponse removeCheckUser(
+    public GetCheckResponse removeCheckUser(
             @RequestParam("check_id") Long checkId,
             @RequestParam("remove_user_id") Long removeUserId
     ) {
         LOGGER.info("Remove check user. checkId: {}, removeUserId", checkId, removeUserId);
         CurrentUser currentUser = userAuthService.getCurrentUser();
-        validatedAccess.validateCurrentUser(currentUser);
+        validatedAccess.validateCurrentUserFound(currentUser);
         Check check = validatedAccess.getCurrentUserCheck(currentUser, checkId);
         Optional<User> userToRemoveOpt = check.getUsers().stream()
                 .filter(x -> Objects.equals(removeUserId, x.getId()))
                 .findAny();
         if (!userToRemoveOpt.isPresent()) {
-            CheckResponse response = conversionService.convert(check, CheckResponse.class);
+            GetCheckResponse response = conversionService.convert(check, GetCheckResponse.class);
             LOGGER.info("Check user already removed. response: {}", response);
             return response;
         }
         check.getUsers().remove(userToRemoveOpt.get());
         userRepository.saveCurrentUser(currentUser);
-        CheckResponse response = conversionService.convert(check, CheckResponse.class);
+        GetCheckResponse response = conversionService.convert(check, GetCheckResponse.class);
         LOGGER.info("Check user removed. response: {}", response);
         return response;
     }

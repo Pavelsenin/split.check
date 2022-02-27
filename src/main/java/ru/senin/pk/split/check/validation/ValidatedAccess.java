@@ -25,12 +25,26 @@ public class ValidatedAccess {
      * @param currentUser
      * @throws ServiceValidationException if current user not found
      */
-    public void validateCurrentUser(CurrentUser currentUser) {
+    public void validateCurrentUserFound(CurrentUser currentUser) {
         if (Objects.isNull(currentUser)) {
             LOGGER.info("Current user not found");
             throw new ServiceValidationException("Current user not found");
         }
     }
+
+    /**
+     * Validate not current user by id
+     *
+     * @param currentUser
+     * @throws ServiceValidationException if current user not found
+     */
+    public void validateNotCurrentUser(CurrentUser currentUser, Long userId) {
+        if (Objects.equals(currentUser.getId(), userId)) {
+            LOGGER.info("Current user id used");
+            throw new ServiceValidationException("Current user id used");
+        }
+    }
+
 
     /**
      * Validate current user has check with specified id
@@ -94,7 +108,7 @@ public class ValidatedAccess {
      * @param currentUser
      * @throws ServiceValidationException if user not found
      */
-    public void validateUser(User currentUser) {
+    public void validateUserFound(User currentUser) {
         if (Objects.isNull(currentUser)) {
             LOGGER.info("User not found");
             throw new ServiceValidationException("User not found");

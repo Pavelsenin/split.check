@@ -5,18 +5,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SignUpRequest {
+public class DeclineFriendRequest {
 
     @NotNull
-    @Size(min = 1, max = 25)
-    private String username;
-
-    @NotNull
-    @Size(min = 1, max = 120)
-    private String password;
+    private Long id;
 }

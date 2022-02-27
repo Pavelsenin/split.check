@@ -19,8 +19,14 @@ public class CurrentUser extends User {
      */
     private List<Check> checks = Collections.emptyList();
 
-    public CurrentUser(Long id, String name, List<Check> checks) {
+    /**
+     * User friend requests
+     */
+    private UserFriendRequests userFriendRequests = new UserFriendRequests();
+
+    public CurrentUser(Long id, String name, List<Check> checks, UserFriendRequests userFriendRequests) {
         super(id, name);
         this.checks = checks;
+        this.userFriendRequests = userFriendRequests;
     }
 }

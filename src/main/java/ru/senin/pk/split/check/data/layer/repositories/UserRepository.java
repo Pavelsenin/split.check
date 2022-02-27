@@ -1,6 +1,7 @@
 package ru.senin.pk.split.check.data.layer.repositories;
 
 import ru.senin.pk.split.check.model.CurrentUser;
+import ru.senin.pk.split.check.model.RegisteredUser;
 import ru.senin.pk.split.check.model.User;
 
 public interface UserRepository {
@@ -27,5 +28,5 @@ public interface UserRepository {
      * @param userId
      * @return
      */
-    User getUser(Long userId);
+    RegisteredUser getRegisteredUserById(Long userId);
 }

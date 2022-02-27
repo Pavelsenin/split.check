@@ -9,13 +9,13 @@ import ru.senin.pk.split.check.controllers.responses.TransferResponse;
 import ru.senin.pk.split.check.model.Check;
 import ru.senin.pk.split.check.model.Purchase;
 import ru.senin.pk.split.check.model.User;
-import ru.senin.pk.split.check.controllers.responses.CheckResponse;
+import ru.senin.pk.split.check.controllers.responses.GetCheckResponse;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class CheckToCheckResponseConverter implements Converter<Check, CheckResponse> {
+public class CheckToCheckResponseConverter implements Converter<Check, GetCheckResponse> {
 
     private final ConversionService conversionService;
 
@@ -25,7 +25,7 @@ public class CheckToCheckResponseConverter implements Converter<Check, CheckResp
     }
 
     @Override
-    public CheckResponse convert(Check source) {
+    public GetCheckResponse convert(Check source) {
         List<Long> purchaseIds = source.getPurchases().stream()
                 .map(Purchase::getId)
                 .collect(Collectors.toList());
@@ -35,7 +35,7 @@ public class CheckToCheckResponseConverter implements Converter<Check, CheckResp
         List<TransferResponse> checkTransfers = source.getTransfers().stream()
                 .map(transfer -> conversionService.convert(transfer, TransferResponse.class))
                 .collect(Collectors.toList());
-        return new CheckResponse(
+        return new GetCheckResponse(
                 source.getId(),
                 source.getName(),
                 source.getDate(),

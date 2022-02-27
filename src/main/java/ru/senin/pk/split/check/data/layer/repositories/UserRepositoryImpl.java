@@ -7,11 +7,9 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.senin.pk.split.check.data.layer.dao.*;
-import ru.senin.pk.split.check.data.layer.entities.CheckEntity;
-import ru.senin.pk.split.check.data.layer.entities.PurchaseEntity;
-import ru.senin.pk.split.check.data.layer.entities.UserAuthEntity;
-import ru.senin.pk.split.check.data.layer.entities.UserEntity;
+import ru.senin.pk.split.check.data.layer.entities.*;
 import ru.senin.pk.split.check.model.*;
+import ru.senin.pk.split.check.utils.SerializationUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,12 +33,14 @@ public class UserRepositoryImpl implements UserRepository {
 
     private final PurchasesConsumersDao purchasesConsumersDao;
 
+    private final FriendsRequestsDao friendsRequestsDao;
+
     private final ConversionService conversionService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserRepositoryImpl.class);
 
     @Autowired
-    public UserRepositoryImpl(UserDao userDao, UserAuthDao userAuthDao, CheckDao checkDao, PurchaseDao purchaseDao, UserChecksDao userChecksDao, ChecksPurchasesDao checksPurchasesDao, PurchasesPayersDao purchasesPayersDao, PurchasesConsumersDao purchasesConsumersDao, ConversionService conversionService) {
+    public UserRepositoryImpl(UserDao userDao, UserAuthDao userAuthDao, CheckDao checkDao, PurchaseDao purchaseDao, UserChecksDao userChecksDao, ChecksPurchasesDao checksPurchasesDao, PurchasesPayersDao purchasesPayersDao, PurchasesConsumersDao purchasesConsumersDao, FriendsRequestsDao friendsRequestsDao, ConversionService conversionService) {
         this.userDao = userDao;
         this.userAuthDao = userAuthDao;
         this.checkDao = checkDao;
@@ -49,6 +49,7 @@ public class UserRepositoryImpl implements UserRepository {
         this.checksPurchasesDao = checksPurchasesDao;
         this.purchasesPayersDao = purchasesPayersDao;
         this.purchasesConsumersDao = purchasesConsumersDao;
+        this.friendsRequestsDao = friendsRequestsDao;
         this.conversionService = conversionService;
     }
 
@@ -121,16 +122,48 @@ public class UserRepositoryImpl implements UserRepository {
                 //
             }
         }
+        //
+
+        // Receive friend requests
+        currentUser.setUserFriendRequests(getUserFriendRequests(currentUser));
         LOGGER.info("Current user found by id. currentUser: {}", currentUser);
         return currentUser;
+    }
+
+    private UserFriendRequests getUserFriendRequests(CurrentUser currentUser) {
+        UserFriendRequests userFriendRequests = new UserFriendRequests();
+        List<FriendsRequestEntity> friendRequestEntities = friendsRequestsDao.getFriendsRequests(currentUser.getId());
+        for (FriendsRequestEntity friendsRequestEntity : friendRequestEntities) {
+            if (Objects.equals(friendsRequestEntity.getStatus(), FriendsRequestEntity.Status.DECLINED)) {
+                continue;
+            }
+            FriendsRequest friendsRequest = conversionService.convert(friendsRequestEntity, FriendsRequest.class);
+            UserEntity sourceUserEntity = userDao.getUserById(friendsRequestEntity.getSourceUserId());
+            RegisteredUser sourceUser = conversionService.convert(sourceUserEntity, RegisteredUser.class);
+            friendsRequest.setSourceUser(sourceUser);
+            UserEntity targetUserEntity = userDao.getUserById(friendsRequestEntity.getTargetUserId());
+            RegisteredUser targetUser = conversionService.convert(targetUserEntity, RegisteredUser.class);
+            friendsRequest.setTargetUser(targetUser);
+            if (Objects.equals(friendsRequestEntity.getStatus(), FriendsRequestEntity.Status.PENDING)) {
+                if (Objects.equals(friendsRequest.getSourceUser().getId(), currentUser.getId())) {
+                    userFriendRequests.getOutgoingFriendsRequests().add(friendsRequest);
+                } else {
+                    userFriendRequests.getIncomingFriendsRequests().add(friendsRequest);
+                }
+            } else if (Objects.equals(friendsRequestEntity.getStatus(), FriendsRequestEntity.Status.ACCEPTED)) {
+                userFriendRequests.getAcceptedFriendsRequests().add(friendsRequest);
+            }
+        }
+        return userFriendRequests;
     }
 
     @Transactional
     @Override
     public void saveCurrentUser(CurrentUser currentUser) {
-        LOGGER.info("Save current user. currentUser: {}", currentUser);
+        LOGGER.info("Save current user. currentUser: {}", SerializationUtils.toString(currentUser));
         UserEntity userEntity = conversionService.convert(currentUser, UserEntity.class);
         userDao.saveUser(userEntity);
+        currentUser.setId(userEntity.getId());
         for (Check check : currentUser.getChecks()) {
             CheckEntity checkEntity = conversionService.convert(check, CheckEntity.class);
             checkDao.saveCheck(checkEntity);
@@ -166,26 +199,49 @@ public class UserRepositoryImpl implements UserRepository {
                 .collect(Collectors.toList());
         userChecksDao.setChecks(checkIds, userEntity.getId());
 
+        saveUserFriendRequests(currentUser);
+
         UserAuth auth = currentUser.getAuth();
         UserAuthEntity authEntity = conversionService.convert(auth, UserAuthEntity.class);
         authEntity.setUserId(userEntity.getId());
         userAuthDao.saveUserAuth(authEntity);
-        LOGGER.info("Current user saved. currentUser: {}", currentUser);
+        LOGGER.info("Current user saved. currentUser: {}", SerializationUtils.toString(currentUser));
+    }
+
+    private void saveUserFriendRequests(CurrentUser currentUser) {
+        UserFriendRequests userFriendRequests = currentUser.getUserFriendRequests();
+        List<FriendsRequestEntity> friendRequestEntities = new ArrayList<>();
+        for (FriendsRequest acceptedFriendsRequest : userFriendRequests.getAcceptedFriendsRequests()) {
+            FriendsRequestEntity friendsRequestEntity = conversionService.convert(acceptedFriendsRequest, FriendsRequestEntity.class);
+            friendsRequestEntity.setStatus(FriendsRequestEntity.Status.ACCEPTED);
+            friendRequestEntities.add(friendsRequestEntity);
+        }
+        for (FriendsRequest incomingFriendsRequest : userFriendRequests.getIncomingFriendsRequests()) {
+            FriendsRequestEntity friendsRequestEntity = conversionService.convert(incomingFriendsRequest, FriendsRequestEntity.class);
+            friendsRequestEntity.setStatus(FriendsRequestEntity.Status.PENDING);
+            friendRequestEntities.add(friendsRequestEntity);
+        }
+        for (FriendsRequest outgoingFriendsRequest : userFriendRequests.getOutgoingFriendsRequests()) {
+            FriendsRequestEntity friendsRequestEntity = conversionService.convert(outgoingFriendsRequest, FriendsRequestEntity.class);
+            friendsRequestEntity.setStatus(FriendsRequestEntity.Status.PENDING);
+            friendRequestEntities.add(friendsRequestEntity);
+        }
+        friendsRequestsDao.saveFriendsRequests(currentUser.getId(), friendRequestEntities);
     }
 
     @Override
-    public User getUser(Long id) {
-        LOGGER.info("Get user by id. id: {}", id);
+    public RegisteredUser getRegisteredUserById(Long id) {
+        LOGGER.info("Get registered user by id. id: {}", id);
         if (Objects.isNull(id)) {
             return null;
         }
         UserEntity userEntity = userDao.getUserById(id);
         if (Objects.isNull(userEntity)) {
-            LOGGER.info("User not found by id. id: {}", id);
+            LOGGER.info("Registered user not found by id. id: {}", id);
             return null;
         }
         RegisteredUser user = conversionService.convert(userEntity, RegisteredUser.class);
-        LOGGER.info("User  found by id. user: {}", user);
+        LOGGER.info("Registered user  found by id. user: {}", user);
         return user;
     }
 }

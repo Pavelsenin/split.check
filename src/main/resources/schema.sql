@@ -11,6 +11,16 @@ CREATE TABLE IF NOT EXISTS users_auth (
     CONSTRAINT users_auth_pk PRIMARY KEY (username, user_id),
     CONSTRAINT users_auth_fk FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS friends_requests (
+    source_user_id BIGINT,
+    target_user_id BIGINT,
+    status VARCHAR(10),
+    CONSTRAINT friends_requests_pk PRIMARY KEY (source_user_id, target_user_id),
+    CONSTRAINT friends_requests_from_fk FOREIGN KEY (source_user_id) REFERENCES users(id),
+    CONSTRAINT friends_requests_to_fk FOREIGN KEY (target_user_id) REFERENCES users(id)
+);
+
 CREATE TABLE IF NOT EXISTS checks (
     id BIGINT IDENTITY(1, 1),
     name VARCHAR(50) NOT NULL,

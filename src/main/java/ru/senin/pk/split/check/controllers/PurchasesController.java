@@ -12,7 +12,7 @@ import ru.senin.pk.split.check.model.Check;
 import ru.senin.pk.split.check.model.CurrentUser;
 import ru.senin.pk.split.check.model.Purchase;
 import ru.senin.pk.split.check.model.User;
-import ru.senin.pk.split.check.controllers.responses.PurchaseResponse;
+import ru.senin.pk.split.check.controllers.responses.GetPurchasesResponse;
 import ru.senin.pk.split.check.services.UserAuthService;
 import ru.senin.pk.split.check.validation.ValidatedAccess;
 
@@ -47,16 +47,16 @@ public class PurchasesController {
 
     @GetMapping(path = "/get")
     @ResponseBody
-    public List<PurchaseResponse> getPurchases(
+    public List<GetPurchasesResponse> getPurchases(
             @RequestParam("check_id") Long checkId
     ) {
         LOGGER.info("Get purchases. checkId: {}", checkId);
         CurrentUser currentUser = userAuthService.getCurrentUser();
-        validatedAccess.validateCurrentUser(currentUser);
+        validatedAccess.validateCurrentUserFound(currentUser);
         Check check = validatedAccess.getCurrentUserCheck(currentUser, checkId);
         List<Purchase> purchases = check.getPurchases();
-        List<PurchaseResponse> response = purchases.stream()
-                .map(purchase -> conversionService.convert(purchase, PurchaseResponse.class))
+        List<GetPurchasesResponse> response = purchases.stream()
+                .map(purchase -> conversionService.convert(purchase, GetPurchasesResponse.class))
                 .collect(Collectors.toList());
         LOGGER.info("Purchases found. purchases: {}, response: {}", purchases, response);
         return response;
@@ -72,13 +72,13 @@ public class PurchasesController {
      */
     @PostMapping(path = "/new")
     @ResponseBody
-    public PurchaseResponse addNewPurchase(
+    public GetPurchasesResponse addNewPurchase(
             @RequestParam("check_id") @NotNull Long checkId,
             @RequestBody @Valid AddNewPurchaseRequest request
     ) {
         LOGGER.info("Add new purchase. checkId: {}, request: {}", checkId, request);
         CurrentUser currentUser = userAuthService.getCurrentUser();
-        validatedAccess.validateCurrentUser(currentUser);
+        validatedAccess.validateCurrentUserFound(currentUser);
         Check check = validatedAccess.getCurrentUserCheck(currentUser, checkId);
 
         Purchase newPurchase = new Purchase();
@@ -96,7 +96,7 @@ public class PurchasesController {
         check.getPurchases().add(newPurchase);
 
         userRepository.saveCurrentUser(currentUser);
-        PurchaseResponse response = conversionService.convert(newPurchase, PurchaseResponse.class);
+        GetPurchasesResponse response = conversionService.convert(newPurchase, GetPurchasesResponse.class);
         LOGGER.info("New purchase added. newPurchase: {}, response: {} ", newPurchase, response);
         return response;
     }

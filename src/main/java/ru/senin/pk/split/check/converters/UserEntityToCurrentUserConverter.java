@@ -15,7 +15,8 @@ public class UserEntityToCurrentUserConverter implements Converter<UserEntity, C
         return new CurrentUser(
                 source.getId(),
                 source.getName(),
-                Collections.emptyList()
+                Collections.emptyList(),
+                null
         );
     }
 }
