@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Sample suite" parallel="false">
+    <parameter name="ORIGIN" value="http://127.0.0.1:8080"/>
+    <test verbose="1" name="TestNG" annotations="JDK">
+        <classes>
+            <class name="ru.senin.pk.split.check.integration.test.scenario.EndToEndTest"/>
+            <class name="ru.senin.pk.split.check.integration.test.scenario.SignUpValidationTest"/>
+            <class name="ru.senin.pk.split.check.integration.test.scenario.AddNewCheckValidationTest"/>
+            <class name="ru.senin.pk.split.check.integration.test.scenario.AddNewPurchaseValidationTest"/>
+        </classes>
+    </test>
+</suite>
