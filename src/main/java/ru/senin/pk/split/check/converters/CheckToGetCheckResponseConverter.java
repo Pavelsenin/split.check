@@ -15,12 +15,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class CheckToCheckResponseConverter implements Converter<Check, GetCheckResponse> {
+public class CheckToGetCheckResponseConverter implements Converter<Check, GetCheckResponse> {
 
     private final ConversionService conversionService;
 
     @Autowired
-    public CheckToCheckResponseConverter(@Lazy ConversionService conversionService) {
+    public CheckToGetCheckResponseConverter(@Lazy ConversionService conversionService) {
         this.conversionService = conversionService;
     }
 

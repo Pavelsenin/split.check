@@ -8,6 +8,7 @@
             <class name="ru.senin.pk.split.check.integration.test.scenario.SignUpValidationTest"/>
             <class name="ru.senin.pk.split.check.integration.test.scenario.AddNewCheckValidationTest"/>
             <class name="ru.senin.pk.split.check.integration.test.scenario.AddNewPurchaseValidationTest"/>
+            <class name="ru.senin.pk.split.check.integration.test.scenario.UpdateCheckUsersTest"/>
         </classes>
     </test>
 </suite>

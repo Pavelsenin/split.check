@@ -21,6 +21,9 @@ public enum ITParam {
     PAYER_ID(String.class),
     CONSUMERS_IDS(List.class),
     CHECK_ID(String.class),
+    CHECK_NAME(String.class),
+    CHECK_DATE(String.class),
+    CHECK_USERS_IDS(List.class),
     PURCHASE_COST(String.class);
 
     @Getter
